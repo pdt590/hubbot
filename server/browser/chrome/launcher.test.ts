@@ -61,6 +61,22 @@ function launcher(machine: ReturnType<typeof mac>, overrides: Partial<Constructo
 const headless = (path: string) => ({ command: "/engine/agent-browser", env: { AGENT_BROWSER_EXECUTABLE_PATH: path, AGENT_BROWSER_HEADLESS: "1" } });
 
 describe("the Chrome launcher", () => {
+  it("on Windows gives agent-browser Chrome itself once it is ready, so no cmd.exe console opens beside it", async () => {
+    const machine = mac();
+    const attached = sidecars();
+    const chrome = launcher(machine, { platform: "win32", sidecars: attached });
+    expect(chrome.env()).toEqual({ AGENT_BROWSER_EXECUTABLE_PATH: chrome.path, AGENT_BROWSER_HIDE_SCROLLBARS: "0" });
+    await chrome.ready(headless(chrome.path));
+    const env = chrome.env();
+    expect(env).toMatchObject({ AGENT_BROWSER_EXECUTABLE_PATH: machine.chrome, AGENT_BROWSER_USER_AGENT: identity("155").userAgent, AGENT_BROWSER_HIDE_SCROLLBARS: "0" });
+    expect(env.AGENT_BROWSER_ARGS).toContain("--screen-info={1440x900}");
+    expect(env.AGENT_BROWSER_ARGS).not.toContain("--user-agent=");
+    // Still this launcher's Chrome: its identity sidecar attaches as it does through the batch launcher.
+    const spec = headless(env.AGENT_BROWSER_EXECUTABLE_PATH!);
+    await chrome.started("s1", spec);
+    expect(attached.ensure).toHaveBeenCalledOnce();
+  });
+
   it("gives agent-browser a launcher for the installed Google Chrome, with the identity read from that binary", async () => {
     const machine = mac();
     const calibrate = vi.fn(async () => identity("155"));
