@@ -76,6 +76,8 @@ export interface ConfigStatus {
   pausedByPerson?: { bots: string[]; departments: string[] };
   /** Every bot taking no new work because the person paused it or its department. */
   heldBots?: string[];
+  /** The server cannot read its saved routines, so none runs until it can. */
+  routinesUnreadable?: true;
   threads?: { maxConcurrentPerBot: number; eventLogMaxBytes?: number; eventLogRetentionDays?: number };
   automaticRecovery?: { enabled: boolean; backup?: ModelSelection };
   /** Prompt-cache keep-warm for idle Claude threads. Absent from older servers. */
@@ -109,6 +111,8 @@ export interface ConfigStatus {
    * the one under Settings → API keys); `sharedKey`: that one is on file. */
   decider?: {
     provider: "jev" | "workersai" | "openrouter" | "custom";
+    /** Jev, when the person picked it but the shared OpenRouter key decides until a Jev key is saved. */
+    chosen?: "jev";
     /** The OpenRouter or custom model in use; present only while that is the provider. */
     model?: string;
     /** The custom endpoint's protocol, or the OpenRouter API. */
