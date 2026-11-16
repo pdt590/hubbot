@@ -35,7 +35,19 @@ export interface PageOpenFacts {
  * bot chat whose browser is on and installed; never a room, and never the remote client, which has no such panel.
  */
 export function pagePanelBot(url: string, facts: PageOpenFacts): string | null {
-  if (!facts.desktop || facts.desktop.remoteClient?.active || !isPublishedPageUrl(url)) return null;
+  return isPublishedPageUrl(url) ? browserPanelBot(facts) : null;
+}
+
+/** The bot whose browser panel can open any link now: the open bot chat's, with its browser on and installed. Null
+ * outside the desktop app, in a room, or for the remote client. */
+export function browserPanelBot(facts: PageOpenFacts): string | null {
+  return facts.desktop ? readyBrowserBot(facts) : null;
+}
+
+/** The selected bot when its browser panel is on and installed; the web app has that panel too. Never a room or the
+ * remote client. */
+function readyBrowserBot(facts: PageOpenFacts): string | null {
+  if (facts.desktop?.remoteClient?.active) return null;
   if (facts.groups.some((group) => group.id === facts.selectedId)) return null;
   const bot = facts.bots.find((candidate) => candidate.id === facts.selectedId);
   const engine = facts.config?.browserEngine;
@@ -43,14 +55,23 @@ export function pagePanelBot(url: string, facts: PageOpenFacts): string | null {
   return engine?.installing || engine?.installError ? null : bot.id;
 }
 
-export interface PanelPage { botId: string; url: string; nonce: number; at: number }
+/** The open bot chat's browser panel, else the first bot whose browser can open a link, for an action that is not tied
+ * to a chat (an app's sign-in page), in the desktop or the web app. Null when no bot has one. */
+export function anyBrowserPanelBot(facts: PageOpenFacts): string | null {
+  return readyBrowserBot(facts)
+    ?? facts.bots.map((bot) => readyBrowserBot({ ...facts, selectedId: bot.id })).find((id) => id !== null)
+    ?? null;
+}
+
+/** `onOpened` runs once the panel's browser has opened the page in a new tab. */
+export interface PanelPage { botId: string; url: string; nonce: number; at: number; onOpened?: () => void }
 /** A request older than this is dropped, so a panel opened much later never opens a page by surprise. */
 const PANEL_PAGE_FRESH_MS = 10_000;
 let pending: PanelPage | null = null, nonce = 0;
 const takers = new Set<() => void>();
 
-export function requestPanelPage(botId: string, url: string, now = Date.now()): void {
-  pending = { botId, url, nonce: ++nonce, at: now };
+export function requestPanelPage(botId: string, url: string, now = Date.now(), onOpened?: () => void): void {
+  pending = { botId, url, nonce: ++nonce, at: now, ...(onOpened ? { onOpened } : {}) };
   for (const take of takers) take();
 }
 

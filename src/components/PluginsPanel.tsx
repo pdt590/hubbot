@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, ChevronRight, Loader2, RefreshCw, Search, Server, TriangleAlert, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Loader2, Receipt, RefreshCw, Search, Server, TriangleAlert, X } from "lucide-react";
 import { api, useStore, type Bot, type InstanceInfo } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { glassPopupFrameStyle } from "@/lib/glass-popup";
@@ -28,6 +28,8 @@ import {
 import { BotAvatar } from "./Avatar";
 import { SidebarPopoverMenu } from "./SidebarPopoverMenu";
 import { appCategoryLabel, CATEGORY_SECTION_SIZE, catalogSections, connectorDescription, inCategory, rankCategories } from "@/lib/app-catalog";
+import { setVietConnected, useVietConnected, VIET_APPS, vietRouteKey, type VietApp } from "@/lib/viet-apps";
+import { anyBrowserPanelBot, requestPanelPage } from "@/lib/page-open";
 import { McpServersPanel } from "./McpServersPanel";
 import { HOSTED_MCP_APPS, mcpServerConnected, ownMcpServer, type HostedApp, type HostedConnections } from "@/lib/hosted-mcp-apps";
 import { isRemoteMcpListing, type McpServerListing } from "./mcp-draft";
@@ -422,6 +424,7 @@ export function PluginsPanel() {
   const setupNotice = connectorSetupNotice({ configured, stale, setup, remoteClient });
   const chooseFilter = (next: AppsFilter) => {
     setCategory(null);
+    setVietOpen(false);
     if (next === "mcp") {
       dispatch({ type: "togglePlugins", open: true, surface: "mcp" });
       return;
@@ -446,6 +449,7 @@ export function PluginsPanel() {
   const connectedCards = (cards ?? []).filter((card) => hasActiveConnection(status[card.slug]));
   const pickCategory = (next: string | null) => {
     setCategory(next);
+    setVietOpen(false);
     setTab("marketplace");
     if (surface !== "apps") dispatch({ type: "togglePlugins", open: true, surface: "apps" });
   };
@@ -454,6 +458,10 @@ export function PluginsPanel() {
     : filter === "connected"
       ? t("connectors.section.yours")
       : category ? appCategoryLabel(category) : (sections.length > 1 ? t("apps.section.all") : t("connectors.section.available"));
+  // Declared after every hook, so the state order the tests rely on above is unchanged.
+  const [vietOpen, setVietOpen] = useState(false);
+  const vietConnected = useVietConnected();
+  const connectedViet = VIET_APPS.filter((app) => vietConnected.includes(app.label) && app.label.toLowerCase().includes(search.trim().toLowerCase()));
   const pill = "inline-flex h-7 shrink-0 items-center justify-center gap-2 rounded-full px-3 text-[13px] font-medium leading-5 transition-colors";
   const pillTone = (selected: boolean) => selected
     ? "bg-ink text-app"
@@ -501,7 +509,7 @@ export function PluginsPanel() {
                   </span>
                 )}
                 <span className="whitespace-nowrap">
-                  {connectedCount > 0 ? t("apps.connectedCount", { count: connectedCount }) : t("apps.filter.connected")}
+                  {connectedCount + vietConnected.length > 0 ? t("apps.connectedCount", { count: connectedCount + vietConnected.length }) : t("apps.filter.connected")}
                 </span>
                 <ChevronRight size={14} aria-hidden="true" className="shrink-0 rtl:-scale-x-100" />
               </button>
@@ -554,9 +562,18 @@ export function PluginsPanel() {
               data-apps-filter="all"
               aria-pressed={filter === "all" && category === null}
               onClick={() => { chooseFilter("all"); setCategory(null); }}
-              className={cn(pill, pillTone(filter === "all" && category === null))}
+              className={cn(pill, pillTone(filter === "all" && category === null && !vietOpen))}
             >
               {t("apps.filter.all")}
+            </button>
+            <button
+              type="button"
+              data-apps-viet
+              aria-pressed={vietOpen}
+              onClick={() => { chooseFilter("all"); setVietOpen((open) => !open); }}
+              className={cn(pill, pillTone(vietOpen))}
+            >
+              {t("apps.viet.chip")}
             </button>
             {ranked.inline.map((name) => (
               <button
@@ -636,9 +653,16 @@ export function PluginsPanel() {
           )}
           {error && <div role="alert" className="mb-3 rounded-xl bg-danger/10 px-3 py-2 text-[12px] text-danger">{typeof error === "string" ? error : t(error.key)}</div>}
 
-          {filter !== "mcp" && (
+          {vietOpen && renderViet()}
+
+          {filter !== "mcp" && !vietOpen && (
             <div data-apps-grid className="@container flex flex-col gap-7 pt-1">
-              {!sections.some((section) => section.kind === "connected") && renderSuggested()}
+              {!sections.some((section) => section.kind === "connected") && (
+                <>
+                  {sectioned && !vietOpen && renderViet()}
+                  {renderSuggested()}
+                </>
+              )}
               {sections.filter((section) => section.kind !== "all").map((section) => section.kind === "connected" ? (
                 <Fragment key="connected">
                   <AppsSection
@@ -648,6 +672,7 @@ export function PluginsPanel() {
                   >
                     {section.cards.slice(0, CATEGORY_SECTION_SIZE).map((card) => renderTile(card))}
                   </AppsSection>
+                  {sectioned && !vietOpen && renderViet()}
                   {renderSuggested()}
                 </Fragment>
               ) : (
@@ -693,7 +718,7 @@ export function PluginsPanel() {
                         </button>
                       </div>
                     )}
-                    {cards !== null && allShown.length === 0 && !nativeCardsShown && sections.length <= 1 && (
+                    {cards !== null && allShown.length === 0 && !nativeCardsShown && sections.length <= 1 && !(filter === "connected" && connectedViet.length > 0) && (
                       <div className="flex min-h-40 flex-col items-center justify-center text-center">
                         <div className="text-[14px] font-medium text-ink">
                           {listing === "connected" ? connectedEmptyCopy.title : t("connectors.noAppsFound")}
@@ -722,11 +747,12 @@ export function PluginsPanel() {
                 <div data-native-card="email" className={showEmail && !inCategoryView ? "contents" : "hidden"}><EmailCard refreshKey={cardsRefresh} onConnection={setEmailConnected} /></div>
                 <div data-native-card="postiz" className={postizHere ? "contents" : "hidden"}><PostizCard refreshKey={cardsRefresh} onConnection={setPostizConnected} /></div>
                 {allShown.map((card) => renderTile(card))}
+                {filter === "connected" && connectedViet.map(renderVietRow)}
               </AppsSection>
             </div>
           )}
 
-          {filter !== "connected" && category === null && (
+          {filter !== "connected" && category === null && !vietOpen && (
             <div className={cn(filter === "all" && "mt-8 border-t border-hairline/30 pt-6", filter === "mcp" && "pt-1")}>
               <McpServersPanel embedded hideHosted={filter === "all"} />
             </div>
@@ -748,6 +774,56 @@ export function PluginsPanel() {
       </div>
     </div>
   );
+
+  function renderViet() {
+    return (
+      <AppsSection id="apps-section-viet" title={t("apps.viet.chip")}>
+        {VIET_APPS.map(renderVietRow)}
+      </AppsSection>
+    );
+  }
+
+  function renderVietRow(app: VietApp) {
+    return (
+          <div key={app.label} data-viet-app={app.label} className="flex min-w-0 items-center gap-3 rounded-xl px-2 py-2">
+            {app.logo || app.domain ? (
+              <ServiceIcon card={{ logo: app.logo ?? null, domain: app.domain, label: app.label }} className="size-10 shrink-0 rounded-[8px]" />
+            ) : (
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-raised text-ink-secondary">
+                <Receipt size={20} aria-hidden="true" />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[14px] font-semibold leading-5 text-ink">{app.label}</div>
+              <div className="truncate text-[13px] leading-[18px] text-ink-secondary" title={t(vietRouteKey(app))}>{t(vietRouteKey(app))}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                // Disconnect only forgets the connection here; the site's own session in the browser stays as it is.
+                if (vietConnected.includes(app.label)) {
+                  setVietConnected(app.label, false);
+                  return;
+                }
+                setError(null);
+                const botId = anyBrowserPanelBot({ selectedId: state.selectedId, bots: state.bots, groups: state.groups ?? [], config: state.config, desktop: window.ogb });
+                if (!botId) {
+                  setError(t("apps.viet.noBrowser"));
+                  return;
+                }
+                // Connected only once the built-in browser has opened the page, which happens after this pop-up closes.
+                const label = app.label;
+                requestPanelPage(botId, app.url, Date.now(), () => setVietConnected(label, true));
+                close();
+                dispatch({ type: "toggleComputer", open: true, botId });
+              }}
+              className="inline-flex h-7 min-w-[64px] shrink-0 items-center justify-center rounded-full bg-control/80 px-3 text-[13px] font-medium leading-5 text-ink transition-colors hover:bg-raised-hover"
+            >
+              {vietConnected.includes(app.label) ? t("connectors.disconnect") : t("connectors.action.connect")}
+            </button>
+          </div>
+    );
+  }
 
   function renderSuggested() {
     const shown = suggestions.cards.filter((card) => !isConnected(card.slug));

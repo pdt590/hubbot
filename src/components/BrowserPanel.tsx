@@ -24,7 +24,7 @@ const NO_NAV: BrowserNav = { url: "", loading: false, canGoBack: false, canGoFor
 
 export type BrowserSignIn = { url: string; site: string; nonce: number };
 /** A page to open in a new tab once the view is connected and awake: a published page's Open (usePageOpener). */
-export type BrowserPage = { url: string; nonce: number };
+export type BrowserPage = { url: string; nonce: number; onOpened?: () => void };
 
 function tabsOf(value: unknown): BrowserTab[] {
   if (!Array.isArray(value)) return [];
@@ -208,16 +208,19 @@ export function LiveBrowser({ bot, signIn, page }: { bot: Bot; signIn?: BrowserS
     latest.current.openSignInPage();
   }, [signIn, connected]);
 
-  // A new tab, so whatever the bot has open stays as it was; a sleeping browser is woken first.
+  // A new tab, so whatever the bot has open stays as it was; a sleeping browser is woken first. It waits for the first
+  // tab list: a browser still starting drops a tabNew sent before it.
   useEffect(() => {
     if (!page || !connected || pageHandled.current === page.nonce) return;
     if (asleep) {
       if (asleep === "asleep" && clientRef.current?.send({ type: "wake" })) setAsleep("waking");
       return;
     }
+    if (tabs.length === 0) return;
     pageHandled.current = page.nonce;
     interact({ type: "tabNew", url: page.url });
-  }, [page, connected, asleep, interact]);
+    page.onOpened?.();
+  }, [page, connected, tabs.length, asleep, interact]);
 
   // On macOS a full-screen element takes the window into native full screen, where minimize is disabled.
   useEffect(() => {

@@ -418,6 +418,18 @@ describe("a published page's Open", () => {
     expect(socket.sent.filter((message) => message.type === "tabNew")).toHaveLength(2);
   });
 
+  it("tells the asker when the page opens in its new tab, only once", async () => {
+    const socket = await streaming("you");
+    const opened = vi.fn();
+    await act(async () => root.render(createElement(LiveBrowser, { bot, page: { url: PAGE, nonce: 7, onOpened: opened } })));
+    await flush();
+    expect(socket.sent.at(-1)).toEqual({ type: "tabNew", url: PAGE });
+    expect(opened).toHaveBeenCalledTimes(1);
+    await act(async () => root.render(createElement(LiveBrowser, { bot, page: { url: PAGE, nonce: 7, onOpened: opened } })));
+    await flush();
+    expect(opened).toHaveBeenCalledTimes(1);
+  });
+
   it("waits for the view to connect, and wakes a browser that sat unused before opening the page", async () => {
     await render({ page: { url: PAGE, nonce: 1 } });
     const socket = FakeSocket.instances.at(-1)!;
@@ -426,6 +438,10 @@ describe("a published page's Open", () => {
     await flush();
     expect(socket.sent).toEqual([{ type: "wake" }]);
     await act(async () => socket.message({ type: "awake" }));
+    await flush();
+    // A browser still starting has no tabs yet, and would drop the page: it waits for the first tab list.
+    expect(socket.sent).toEqual([{ type: "wake" }]);
+    await act(async () => socket.message({ type: "tabs", tabs: [{ tabId: "t1", title: "", url: "about:blank", active: true }] }));
     await flush();
     expect(socket.sent).toEqual([{ type: "wake" }, { type: "takeControl" }]);
     await act(async () => socket.control("you"));

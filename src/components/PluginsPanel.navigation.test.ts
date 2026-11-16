@@ -552,7 +552,7 @@ describe("Apps pop-up", () => {
     const { html, nodes: tree } = render();
     const headings = [...html.matchAll(/<h3 id="[^"]*"[^>]*>([^<]*)/g)].map((match) => match[1]);
     // Postiz's own card lives in Social, so Social counts it beside the catalog's one social app.
-    expect(headings).toEqual(["Connected", "Productivity", "Communication", "Social", "All apps"]);
+    expect(headings).toEqual(["Connected", "Viet apps", "Productivity", "Communication", "Social", "All apps"]);
     expect(tree.filter((node) => node.props["data-apps-category"]).map((node) => node.props["data-apps-category"])).toEqual(["Productivity", "Communication", "Social", "Analytics", "Design"]);
     expect(html).toContain('aria-label="More categories"');
     // The dialog clips overflow, so the menu must portal out of it rather than open in place.
@@ -602,7 +602,7 @@ describe("Apps pop-up", () => {
   it("shows Suggested for you after Connected, the same tiles, with the on-demand button", () => {
     fixture.overrides.set(SUGGESTIONS, { cards: [card("notion"), card("gmail")], pick: "available" });
     const { html, nodes: tree } = render();
-    expect(headings(html).slice(0, 2)).toEqual(["Connected", "Suggested for you"]);
+    expect(headings(html).slice(0, 3)).toEqual(["Connected", "Viet apps", "Suggested for you"]);
     expect(html).toContain('data-apps-section="apps-section-suggested"');
     expect(html.match(/data-app-tile="notion"/g)!.length).toBeGreaterThanOrEqual(2);
     expect(suggestedAction(tree)!.label).toBe("Show suggested");
@@ -615,7 +615,7 @@ describe("Apps pop-up", () => {
     fixture.overrides.set(SUGGESTIONS, { cards: [card("slack")], pick: "available" });
     expect(headings(render().html)).not.toContain("Suggested for you");
     fixture.overrides.set(STATUS, {});
-    expect(headings(render().html)[0]).toBe("Suggested for you");
+    expect(headings(render().html)[1]).toBe("Suggested for you");
   });
 
   it("points to Settings for a key when no decision model is available, and hides the button after a pick", () => {
