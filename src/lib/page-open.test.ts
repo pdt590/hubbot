@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { isPublishedPageUrl, pagePanelBot, requestPanelPage, usePanelPage, withPageOpen, type PageOpenFacts, type PanelPage } from "./page-open";
+import { anyBrowserPanelBot, browserSetupBot, isPublishedPageUrl, pagePanelBot, requestPanelPage, usePanelPage, withPageOpen, type PageOpenFacts, type PanelPage } from "./page-open";
 
 const PAGE = "https://abcdefghijklmnopqrstuvwxyz.mausbot.page/";
 const facts = (over: Partial<PageOpenFacts> = {}): PageOpenFacts => ({
@@ -22,6 +22,27 @@ describe("a published page's link", () => {
       "https://user:pw@abcdefghijklmnopqrstuvwxyz.mausbot.page/", "https://abcdefghijklmnopqrstuvwxyz.mausbot.page:8443/",
       "javascript:alert(1)", "not a url", "", undefined, null,
     ]) expect(isPublishedPageUrl(other), String(other)).toBe(false);
+  });
+});
+
+describe("an app's sign-in page when the browser is not ready", () => {
+  const notInstalled = { features: { browser: true }, browserEngine: { kind: "unavailable" as const, installable: true } };
+
+  it("goes to the open bot chat's browser panel, which offers the install, or else the first bot with its browser on", () => {
+    expect(anyBrowserPanelBot(facts({ config: notInstalled }))).toBeNull();
+    expect(browserSetupBot(facts({ config: notInstalled }))).toBe("pepper");
+    expect(browserSetupBot(facts({ config: notInstalled, selectedId: "room", bots: [{ id: "off", browser: false }, { id: "pepper" }] }))).toBe("pepper");
+    expect(browserSetupBot(facts({ config: { features: { browser: true }, browserEngine: { kind: "engine", installing: true } } }))).toBe("pepper");
+  });
+
+  it("has nowhere to go when the browser can't be installed here, is off, or no bot has it on", () => {
+    const cases: Array<[string, Partial<PageOpenFacts>]> = [
+      ["not installable", { config: { features: { browser: true }, browserEngine: { kind: "unavailable", reason: "unsupported" } } }],
+      ["feature off", { config: { ...notInstalled, features: { browser: false } } }],
+      ["remote client", { config: notInstalled, desktop: { remoteClient: { active: true } } }],
+      ["every bot's browser off", { config: notInstalled, bots: [{ id: "pepper", browser: false }] }],
+    ];
+    for (const [name, over] of cases) expect(browserSetupBot(facts(over)), name).toBeNull();
   });
 });
 

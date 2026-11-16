@@ -29,7 +29,7 @@ import { BotAvatar } from "./Avatar";
 import { SidebarPopoverMenu } from "./SidebarPopoverMenu";
 import { appCategoryLabel, CATEGORY_SECTION_SIZE, catalogSections, connectorDescription, inCategory, rankCategories } from "@/lib/app-catalog";
 import { setVietConnected, useVietConnected, VIET_APPS, vietRouteKey, type VietApp } from "@/lib/viet-apps";
-import { anyBrowserPanelBot, requestPanelPage } from "@/lib/page-open";
+import { anyBrowserPanelBot, browserSetupBot, requestPanelPage } from "@/lib/page-open";
 import { McpServersPanel } from "./McpServersPanel";
 import { HOSTED_MCP_APPS, mcpServerConnected, ownMcpServer, type HostedApp, type HostedConnections } from "@/lib/hosted-mcp-apps";
 import { isRemoteMcpListing, type McpServerListing } from "./mcp-draft";
@@ -806,7 +806,9 @@ export function PluginsPanel() {
                   return;
                 }
                 setError(null);
-                const botId = anyBrowserPanelBot({ selectedId: state.selectedId, bots: state.bots, groups: state.groups ?? [], config: state.config, desktop: window.ogb });
+                const facts = { selectedId: state.selectedId, bots: state.bots, groups: state.groups ?? [], config: state.config, desktop: window.ogb };
+                // A browser that is on but not installed yet: its panel offers the install, then opens the page.
+                const botId = anyBrowserPanelBot(facts) ?? browserSetupBot(facts);
                 if (!botId) {
                   setError(t("apps.viet.noBrowser"));
                   return;

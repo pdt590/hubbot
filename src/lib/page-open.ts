@@ -63,6 +63,17 @@ export function anyBrowserPanelBot(facts: PageOpenFacts): string | null {
     ?? null;
 }
 
+/** A bot whose browser is on but not ready yet (not installed, installing, or its install failed), so its panel offers
+ * the install and a page asked for it opens once the browser is ready: the open bot chat's, else the first such bot.
+ * Null when the browser cannot be installed here, and never a room or the remote client. */
+export function browserSetupBot(facts: PageOpenFacts): string | null {
+  const engine = facts.config?.browserEngine;
+  if (facts.desktop?.remoteClient?.active || !builtInBrowserEnabled(facts.config)) return null;
+  if (!engine?.installable && !engine?.installing && engine?.kind !== "engine") return null;
+  const usable = (id: string | null) => !facts.groups.some((group) => group.id === id) && facts.bots.some((bot) => bot.id === id && bot.browser !== false);
+  return usable(facts.selectedId) ? facts.selectedId : facts.bots.find((bot) => usable(bot.id))?.id ?? null;
+}
+
 /** `onOpened` runs once the panel's browser has opened the page in a new tab. */
 export interface PanelPage { botId: string; url: string; nonce: number; at: number; onOpened?: () => void }
 /** A request older than this is dropped, so a panel opened much later never opens a page by surprise. */
