@@ -530,16 +530,10 @@ export function SidebarProfileMenu({ iconOnly = false, rail = false, circle = fa
   const phoneState = usePhonePlaceState(menuOpen);
   const place = useSettingsPlace();
   const summary = useAccountSummary();
-  const desktopUpdate = useUpdateItem();
-  const serverUpdate = useServerUpdateItem(!window.ogb?.updater);
+  // HubBot: no update checks, so the menu offers no update row (the desktop updater is never exposed).
+  const update = useUpdateItem();
   const here = pageIsThisComputer();
   const openComputer = window.ogb?.rail?.openComputer;
-  // A Cloud's page in the desktop window can't update the app: the row says where that happens, and goes there.
-  const elsewhereUpdate: UpdateEntry | null = !desktopUpdate && !here && Boolean(window.ogb) && state.config?.cloudHome === true && openComputer ? {
-    phase: "idle", pending: false, label: t("settings.updates.checkFrom", { place: t("rail.thisComputer") }),
-    item: { key: "update", label: t("settings.updates.checkFrom", { place: t("rail.thisComputer") }), wrap: true, icon: <RefreshCw size={16} />, trailing: <ArrowUpRight size={12} aria-hidden="true" className="text-ink-tertiary" />, onSelect: () => void openComputer("app").catch(() => {}) },
-  } : null;
-  const update = desktopUpdate ?? elsewhereUpdate ?? serverUpdate;
   const [aboutOpen, setAboutOpen] = useState(false);
   const [signingOut, setSigningOut] = useState<"desktop" | "browser" | null>(null);
   const [session, setSession] = useState<SessionState | null>(null);
@@ -604,7 +598,7 @@ export function SidebarProfileMenu({ iconOnly = false, rail = false, circle = fa
     onHelp: () => void openExternalLink(HELP_CENTER_URL),
     onFeedback: () => void openExternalLink(FEEDBACK_URL),
     onWhatsNew: () => void openExternalLink(RELEASES_URL),
-    // Every Sign out asks first: "Sign out of MausBot?" and what keeps running.
+    // Every Sign out asks first: "Sign out of HubBot?" and what keeps running.
     signOut: accounts.view?.active ? null
       : !desktop && session?.kind === "session" ? () => setSigningOut("browser")
       : desktop && !remote && window.ogb?.cloudAccount && summary.signedIn ? () => setSigningOut("desktop")

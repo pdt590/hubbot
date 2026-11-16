@@ -33,8 +33,6 @@ import { ThreadConcurrencySettings } from "../../ThreadConcurrencySettings";
 import { usePhonePlaceState } from "../phone-status";
 import { KeysPage } from "../../keys/KeysPage";
 import { BrowserProfilesRow, ExperimentalFeaturesRow, NewBotEffortRow } from "../../AppSettingsRows";
-import { ServerUpdateRow } from "../../ServerUpdateRow";
-import { versionLine } from "../settings-context";
 import { useSettingsShell } from "../settings-shell";
 import { AdvancedSection } from "../AdvancedSection";
 
@@ -81,7 +79,6 @@ export function OverviewPage() {
         </div>
       </SettingsRows>
     )}
-    {place.kind === "server" && !ctx.client && !window.ogb?.updater && <SettingsGroup label={t("settings.updates.title")} block="version"><SettingsRows><ServerUpdateRow title={versionLine()} /></SettingsRows></SettingsGroup>}
     <SettingsGroup label={t("settings.overview.glance")} block="glance">
       <SettingsRows>
         {!ctx.client && <SettingsLinkRow title={t("settings.section.phoneDevices")} value={phoneValue} onClick={() => go("phone")} data={{ "data-glance": "phone" }} />}
@@ -97,7 +94,7 @@ export function OverviewPage() {
       <SettingsRows><PlaceLookRows /><DefaultBotSidebarRow simple /></SettingsRows>
     </SettingsGroup>
     {ctx.desktop && ctx.cloud && team && team.cloudPage && <div data-settings-block="people-and-plan"><TeamPeopleCard team={team} /></div>}
-    {/* Address: a self-hosted server's own web address, Advanced only. A Cloud's address is MausBot's to manage, so it
+    {/* Address: a self-hosted server's own web address, Advanced only. A Cloud's address is HubBot's to manage, so it
         has none here (no administrator or proxy steps for a person who has no server to set up). */}
     {place.kind === "server" && !ctx.client && ctx.advanced && <CustomDomainSettings />}
   </>;

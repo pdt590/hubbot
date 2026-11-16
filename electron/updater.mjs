@@ -20,6 +20,8 @@ import { createQuietInstall, installFailed, launchAfter, LOOK_EVERY_MS, updateSe
 export { quietSignals } from "./update-when-quiet-main.mjs";
 
 const require = createRequire(import.meta.url);
+// HubBot ships without in-app auto-update (no publish target in electron-builder.yml).
+const AUTO_UPDATE = false;
 
 let autoUpdater = null;
 let win = null;
@@ -182,7 +184,8 @@ export function attachUpdaterWindow(mainWindow) {
 
 /** `signals` (quietSignals): what tells a quiet moment; without them a downloaded update installs only on Restart or quit. */
 export function startUpdater(signals = null) {
-  if (!app.isPackaged) {
+  // HubBot: in-app auto-update is off; never check upstream HubBot releases.
+  if (!AUTO_UPDATE || !app.isPackaged) {
     updaterCoordinator = null;
     setState({ status: "idle" });
     return;

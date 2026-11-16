@@ -18,7 +18,7 @@ const json = (value, status = 200) => new Response(JSON.stringify(value), { stat
 function computer(t, { frozen = { v: 1, at: 1, cloud: CLOUD } } = {}) {
   const parent = mkdtempSync(join(tmpdir(), "omb-clean-"));
   t.after(() => rmSync(parent, { recursive: true, force: true }));
-  const dataDir = join(parent, ".openmausbot");
+  const dataDir = join(parent, ".hubbot");
   const w = { dataDir, cleanDir: cleanWorkspaceDir(dataDir), running: dataDir, swaps: [], requests: [], swapFails: false, changes: 0 };
   mkdirSync(dataDir, { recursive: true });
   w.write = (name, text) => { writeFileSync(join(dataDir, name), text); };
@@ -375,7 +375,7 @@ test("only the data folder itself is this computer's own copy: however it is spe
   const w = computer(t);
   w.running = `${w.dataDir}${sep}`;
   assert.equal(w.clean.ownCopy(), true, "a trailing separator is the same folder");
-  w.running = join(w.dataDir, "..", ".openmausbot");
+  w.running = join(w.dataDir, "..", ".hubbot");
   assert.equal(w.clean.ownCopy(), true);
   w.running = null;
   assert.equal(w.clean.ownCopy(), false);

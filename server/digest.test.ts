@@ -53,7 +53,7 @@ describe("buildTurnDigest", () => {
     const d = buildTurnDigest({
       ...base,
       activities: [
-        activity('/bin/zsh -lc "jq \'.routines[]?\' ~/.openmausbot/bots/main/routines.json"', true, "jq '.routines[]?' routines.json"),
+        activity('/bin/zsh -lc "jq \'.routines[]?\' ~/.hubbot/bots/main/routines.json"', true, "jq '.routines[]?' routines.json"),
         activity('/bin/zsh -lc "rg -n todo src/"', true, "rg -n todo src/"),
         activity("list_routines", true),
       ],

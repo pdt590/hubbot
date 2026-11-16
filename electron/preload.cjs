@@ -439,7 +439,7 @@ const bridge = {
   openAtLogin: {
     state: () => ipcRenderer.invoke("open-at-login:state"),
     set: on => on !== true || isLocalPage || navigator.userActivation?.isActive === true
-      ? ipcRenderer.invoke("open-at-login:set", on === true) : Promise.reject(new Error("Turn on the switch to open OpenMausBot at login.")),
+      ? ipcRenderer.invoke("open-at-login:set", on === true) : Promise.reject(new Error("Turn on the switch to open HubBot at login.")),
   },
   setCredential: (name, value, options) => ipcRenderer.invoke("credential:set", name, value, options),
   // Saved keys this launch could not read, and "Reset saved keys" (main asks the person first, then restarts).
@@ -572,7 +572,7 @@ const bridge = {
       ? ipcRenderer.invoke("cloud-send:move-everything") : Promise.reject(new Error("Choose which bots move.")),
     botMoveRetry: () => ipcRenderer.invoke("cloud-send:bot-move-retry"),
     openMyCloud: () => ipcRenderer.invoke("cloud-send:open-my-cloud"),
-    // Settings → MausBot Cloud, Advanced: "Keep this computer's bots on this computer".
+    // Settings → HubBot Cloud, Advanced: "Keep this computer's bots on this computer".
     keepHere: () => ipcRenderer.invoke("one-home:keep"),
     setKeepHere: on => isLocalPage || navigator.userActivation?.isActive === true
       ? ipcRenderer.invoke("one-home:keep-set", on === true) : Promise.reject(new Error("Turn the switch to keep this computer's bots here.")),
@@ -777,6 +777,15 @@ const bridge = {
     shown: language => { ipcRenderer.send("desktop-language:shown", String(language)); },
   },
 };
+// HubBot: no in-app auto-update. `updater` stays as an inert stub because older Cloud pages still call it
+// (electron/bridge-contract.json). It never reports a state, so every update banner, row and menu item stays hidden.
+bridge.updater = {
+  check: () => Promise.resolve(),
+  install: () => Promise.reject(new Error("HubBot does not update itself.")),
+  seen: () => Promise.resolve(),
+  onState: () => () => {},
+};
+delete bridge.appUpdate;
 
 contextBridge.exposeInMainWorld(
   "ogb",

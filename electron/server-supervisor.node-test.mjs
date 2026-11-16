@@ -228,7 +228,7 @@ test("repeated quit requests join the exact same child cleanup", async (t) => {
   assert.equal(f.children.length, 1);
 });
 
-const LOCAL_FIXTURE = { id: "l1", kind: "local", name: "Work", dataDir: "/Users/me/.openmausbot-work", missing: false };
+const LOCAL_FIXTURE = { id: "l1", kind: "local", name: "Work", dataDir: "/Users/me/.hubbot-work", missing: false };
 
 function runForget(state) {
   const start = MAIN_SOURCE.indexOf("async function forgetEnvironment(");

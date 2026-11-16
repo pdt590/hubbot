@@ -9,7 +9,7 @@ import { AnalyticsRow } from "../../AnalyticsRow";
 import { ChatWidthRow, FontRow, SidebarToolsLayoutRow } from "../../AppearanceSelectRows";
 import {
   ColorUserBubblesRow, FollowUpRow, LanguageRow, PinnedCirclesRow, ReplayTourRow, RunCardRow, SendKeyRow, ShowThreadsRow,
-  ToolCallsRow, UniversalPinsRow, UpdatesRow,
+  ToolCallsRow, UniversalPinsRow,
 } from "../../AppSettingsRows";
 import { ChromeRailRow } from "../../ChromeRailToggle";
 import { ConnectedWorkspacesSettings } from "../../ConnectedWorkspacesSettings";
@@ -28,7 +28,7 @@ import { resolveSkin, SKINS } from "@/lib/skins";
 import { versionLine } from "../settings-context";
 import { useSettingsShell } from "../settings-shell";
 import { PlaceBadge } from "../SettingsNav";
-import { InertRow, useSwitchToComputer } from "../inert";
+import { InertRow } from "../inert";
 import { useOtherPlaces } from "../settings-context";
 
 /** A row this page can't change because it lives on This computer: not on the app's own home page (main's home:page). */
@@ -39,18 +39,13 @@ export function AppPage() {
   const { dispatch } = useStore();
   const [about, setAbout] = useState(false);
   const desk = ctx.desktop && !ctx.client;
-  const computer = useSwitchToComputer();
   const appVersionLine = versionLine(desktopAppVersion());
   return <>
     {ctx.desktop && (
       <SettingsGroup label={t("settings.updates.title")} block="updates">
         <SettingsRows>
-          {window.ogb?.updater ? <UpdatesRow title={appVersionLine} />
-            // On the app's own page with no updater (a package or store build), the version is live and says why
-            // there is no button; only another place's page names This computer.
-            : ctx.home || ctx.client ? <SettingRow title={appVersionLine} subtitle={t("settings.updates.fromPackage")}>{null}</SettingRow>
-              : <InertRow title={appVersionLine} reason={t("settings.inert.checkFromHere", { place: computer.name })}
-                control={<button type="button" className="ui-button" tabIndex={-1}>{t("settings.updates.check")}</button>} />}
+          {/* HubBot: no in-app updates, so only the version shows. */}
+          <SettingRow title={appVersionLine}>{null}</SettingRow>
         </SettingsRows>
       </SettingsGroup>
     )}

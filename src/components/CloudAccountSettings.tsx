@@ -154,7 +154,7 @@ export function CloudPlanOnCloud({ bridge, usage = null, upgrade, extra }: { bri
 }
 
 /** Security: the public native snapshot carries no credential and cannot activate a plan. */
-/** `onSignIn`: the sheet's email-code sign-in (the browser approval stays for openmausbot://cloud and Sign in again). */
+/** `onSignIn`: the sheet's email-code sign-in (the browser approval stays for hubbot://cloud and Sign in again). */
 /** On a Team Cloud: its people and plan live on the Cloud page, where the person signs in with their own email. */
 export function TeamPeopleCard({ team }: { team: { name: string; cloudPage?: string } }) {
   return <Card title={t("cloudAccount.teamPeopleTitle")}>
@@ -165,7 +165,7 @@ export function TeamPeopleCard({ team }: { team: { name: string; cloudPage?: str
   </Card>;
 }
 
-/** One MausBot account, shown as two pages: `account` (who is signed in, sign in and out) and `plan` (the plan, its Cloud
+/** One HubBot account, shown as two pages: `account` (who is signed in, sign in and out) and `plan` (the plan, its Cloud
  * and cancelling it). */
 export function CloudAccountSettings({ linkRequest = 0, cloudHome = false, teamHome, onAddCloud, onSignIn, part = "plan", advanced = true, usage = null, upgrade, extra, avatar }: {
   /** the person's picture, for the account card's leading slot */

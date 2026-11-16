@@ -227,7 +227,7 @@ test("a press, an open or a dismiss that throws is logged, never thrown at Elect
   h.talk.close();
 });
 
-test("clicking the box opens its chat by a link with both ids escaped, or else just shows MausBot", async () => {
+test("clicking the box opens its chat by a link with both ids escaped, or else just shows HubBot", async () => {
   const h = harness({ serve: route => {
     if (route === "/api/bots?messages=0") return json({ bots: [{ id: "b?1&x", defaultBot: {}, tasks: [] }] });
     if (route === "/api/bots/b%3F1%26x/tasks") return json({ task: { threadId: "t 1/x" } });
@@ -244,7 +244,7 @@ test("clicking the box opens its chat by a link with both ids escaped, or else j
   sink.transcript({ text: "what's on today" });
   sink.end({ code: 0, reason: "completed" });
   h.click("open");
-  assert.deepEqual(h.links, ["openmausbot://thread/t%201%2Fx?bot=b%3F1%26x"]);
+  assert.deepEqual(h.links, ["hubbot://thread/t%201%2Fx?bot=b%3F1%26x"]);
   h.talk.close();
 });
 
@@ -276,7 +276,7 @@ test("a press while this computer's server is still starting says so", async () 
   h.start();
   h.press();
   await settle();
-  assert.deepEqual((await h.painted()).at(-1), { state: "error", text: "MausBot is still starting. Try again in a moment.", ...englishLabels });
+  assert.deepEqual((await h.painted()).at(-1), { state: "error", text: "HubBot is still starting. Try again in a moment.", ...englishLabels });
   h.talk.close();
 });
 

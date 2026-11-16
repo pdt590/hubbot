@@ -288,7 +288,7 @@ describe("Computer panel tabs", () => {
       { threadId: "thread-scout", title: "Existing chat", createdAt: 1, cwd: "/Users/me/.openmausbot/task-workspaces/scout/thread-scout" },
     ] }));
     expect(rendered.html).toContain('title="/Users/me/.openmausbot/task-workspaces/scout/thread-scout"');
-    expect(rendered.html).toContain("~/.openmausbot/task-workspaces/scout/thread-scout");
+    expect(rendered.html).toContain("~/.hubbot/task-workspaces/scout/thread-scout");
     expect(rendered.html).not.toContain("Scout&#x27;s private folder");
   });
 

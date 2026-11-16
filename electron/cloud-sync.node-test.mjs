@@ -21,7 +21,7 @@ function setup(t, { origin = "https://omb-u-aaaaaaaaaaaa.fly.dev" } = {}) {
   const clock = { now: AT + 60_000 };
   const service = createCloudFilesService({
     settingsFile: join(dir, "user", "settings.json"), stateFile: join(dir, "user", "state.db"),
-    documentsDir: join(home, "Documents"), localDataDir: join(home, ".openmausbot"), homeDir: home,
+    documentsDir: join(home, "Documents"), localDataDir: join(home, ".hubbot"), homeDir: home,
     platform: process.platform, hostname: "Ash-PC", cloudOrigin: () => current.origin, fetch: async () => { throw new Error("no network in tests"); },
     trashItem: async (file) => rmSync(file), markDownloaded: async () => {},
     createClient: () => holder.cloud.client, watch: () => () => {}, freeBytes: () => 100 * 1024 ** 3, now: () => clock.now,
@@ -30,11 +30,11 @@ function setup(t, { origin = "https://omb-u-aaaaaaaaaaaa.fly.dev" } = {}) {
   return { dir, home, project, cloud, holder, current, clock, service };
 }
 
-test("checks a folder before sharing: too broad, private, MausBot's own, or already shared are refused", async (t) => {
+test("checks a folder before sharing: too broad, private, HubBot's own, or already shared are refused", async (t) => {
   const s = setup(t);
   mkdirSync(join(s.home, ".ssh"), { recursive: true });
-  mkdirSync(join(s.home, ".openmausbot", "files"), { recursive: true });
-  mkdirSync(join(s.home, "Documents", "MausBot"), { recursive: true });
+  mkdirSync(join(s.home, ".hubbot", "files"), { recursive: true });
+  mkdirSync(join(s.home, "Documents", "HubBot"), { recursive: true });
   assert.equal((await s.service.check(s.home)).refusal, "too-broad");
   assert.equal((await s.service.check(join(s.home, ".ssh"))).refusal, "private");
   for (const cli of [".claude", ".codex", ".gemini", ".grok"]) {
@@ -42,7 +42,7 @@ test("checks a folder before sharing: too broad, private, MausBot's own, or alre
     assert.equal((await s.service.check(join(s.home, cli))).refusal, "private");
     assert.equal((await s.service.check(join(s.home, cli, "skills"))).refusal, "private");
   }
-  assert.equal((await s.service.check(join(s.home, ".openmausbot", "files"))).refusal, "app-data");
+  assert.equal((await s.service.check(join(s.home, ".hubbot", "files"))).refusal, "app-data");
   assert.equal((await s.service.check(join(s.home, "Documents"))).refusal, "app-data");
   assert.equal((await s.service.check(join(s.home, "nope"))).refusal, "not-a-folder");
   assert.deepEqual(await s.service.check(s.project), { name: "Clients", pcPath: s.project, files: 1, bytes: 9, partial: false, refusal: null });
@@ -94,7 +94,7 @@ test("repeated output failures reach the Files state and clear after a successfu
   s.cloud.client.download = download;
   await s.service.pass();
   assert.equal(s.service.state().outputs.problem, null);
-  assert.equal(readFileSync(join(s.home, "Documents", "MausBot", "Owl", "Report", "report.md"), "utf8"), "the report");
+  assert.equal(readFileSync(join(s.home, "Documents", "HubBot", "Owl", "Report", "report.md"), "utf8"), "the report");
 });
 
 test("only a folder this computer shared is ever synced: one My Cloud names for it is never read or written", async (t) => {
@@ -183,7 +183,7 @@ test("bots' work from now on comes to Documents/MausBot/<bot>/<conversation>; ol
   s.cloud.put(recent.id, "plan.md", "the plan");
   s.cloud.put(old.id, "old.md", "old work");
   await s.service.pass();
-  const owl = join(s.home, "Documents", "MausBot", "Owl");
+  const owl = join(s.home, "Documents", "HubBot", "Owl");
   assert.deepEqual(readdirSync(owl), ["Q3- plan-"]);
   assert.equal(readFileSync(join(owl, "Q3- plan-", "plan.md"), "utf8"), "the plan");
   assert.equal(s.service.state().outputs.folders, 1);

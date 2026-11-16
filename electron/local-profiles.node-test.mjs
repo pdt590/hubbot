@@ -12,7 +12,7 @@ import { createLocalProfiles, createProfileRegistry, MAX_PROFILES, PROFILES_FILE
 function computer(t, { home = "cloud", frozen = home === "cloud" } = {}) {
   const parent = mkdtempSync(join(tmpdir(), "omb-profiles-"));
   t.after(() => rmSync(parent, { recursive: true, force: true }));
-  const dataDir = join(parent, ".openmausbot");
+  const dataDir = join(parent, ".hubbot");
   mkdirSync(dataDir, { recursive: true });
   if (frozen) writeFileSync(join(dataDir, "moved.json"), JSON.stringify({ v: 1, at: 1, cloud: "https://omb-t-1.fly.dev" }));
   let clock = 1_000;
