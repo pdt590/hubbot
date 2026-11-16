@@ -89,8 +89,7 @@ export const ChromeRow = forwardRef<HTMLInputElement, {
             <div key={tab.tabId} className={`flex max-w-52 shrink-0 items-center gap-1 rounded-xl px-1 text-[12px] ${tab.active ? "bg-inset text-ink" : "text-ink-secondary"}`}>
               <Globe size={13} className="ml-1.5 shrink-0 opacity-60" aria-hidden="true" />
               <button role="tab" aria-selected={tab.active} className="truncate px-1 py-1.5 text-left disabled:cursor-default" disabled={!commandsReady} onClick={() => props.onCommand({ type: "tabSelect", tabId: tab.tabId })} title={tab.title || tab.url}>{tab.title || t("browser.panel.newTab")}</button>
-              {/* The engine refuses to close a session's last tab. */}
-              {tabs.length > 1 && <button className={button} aria-label={t("browser.panel.closeTab", { title: tab.title || t("browser.panel.tab") })} disabled={!commandsReady} onClick={() => props.onCommand({ type: "tabClose", tabId: tab.tabId })}><X size={13} /></button>}
+              <button className={button} aria-label={t("browser.panel.closeTab", { title: tab.title || t("browser.panel.tab") })} disabled={!commandsReady} onClick={() => props.onCommand({ type: "tabClose", tabId: tab.tabId })}><X size={13} /></button>
             </div>
           )) : <div className="flex items-center gap-2 rounded-xl bg-inset px-3 py-1.5 text-[12px] text-ink-secondary"><Globe size={13} aria-hidden="true" />{t("browser.panel.newTab")}</div>}
           <button className={`${button} shrink-0`} disabled={!commandsReady} aria-label={t("browser.panel.newTab")} title={t("browser.panel.newTab")} onClick={() => props.onCommand({ type: "tabNew" })}><Plus size={16} /></button>

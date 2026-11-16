@@ -34,14 +34,3 @@ describe("browser window controls", () => {
     expect(html).toContain(`title="${exit}" aria-label="${exit}"`);
   });
 });
-
-describe("browser tabs", () => {
-  const tab = (tabId: string, active: boolean) => ({ tabId, title: tabId, url: "https://example.com/", active });
-
-  it("offers no close on the only tab, which the engine refuses to close", () => {
-    expect(renderToStaticMarkup(createElement(ChromeRow, { ...props, tabs: [tab("t1", true)] }))).not.toContain("Close t1");
-    const two = renderToStaticMarkup(createElement(ChromeRow, { ...props, tabs: [tab("t1", true), tab("t2", false)] }));
-    expect(two).toContain("Close t1");
-    expect(two).toContain("Close t2");
-  });
-});

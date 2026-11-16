@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { removeTempDir } from "../../testing/cleanup.ts";
-import { batchQuote, browserLanguage, browserTimeZone, directLaunchEnv, languageList, launcherFlags, launcherPath, launcherScript, primaryScreen, writeLauncher, type LauncherSettings } from "./wrapper.ts";
+import { batchQuote, browserLanguage, browserTimeZone, languageList, launcherFlags, launcherPath, launcherScript, primaryScreen, writeLauncher, type LauncherSettings } from "./wrapper.ts";
 
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36";
 const posix = process.platform !== "win32";
@@ -21,17 +21,6 @@ const ENGINE_ARGS = [
 
 describe("the launcher agent-browser runs instead of Chrome", () => {
   const settings: LauncherSettings = { chrome: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", userAgent: UA, screen: { width: 1512, height: 982 }, language: "en-IN" };
-
-  it("names Chrome itself on Windows, with the user agent whole in its own variable and no comma in the arguments", () => {
-    const windows = { ...settings, chrome: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" };
-    const env = directLaunchEnv(windows, "win32");
-    expect(env).toEqual({
-      AGENT_BROWSER_EXECUTABLE_PATH: windows.chrome,
-      AGENT_BROWSER_USER_AGENT: UA,
-      AGENT_BROWSER_ARGS: ["--disable-blink-features=AutomationControlled", "--screen-info={1512x982}", "--lang=en-IN"].join("\n"),
-    });
-    expect(env.AGENT_BROWSER_ARGS).not.toContain(",");
-  });
 
   it("adds the identity flags after the engine's own, so they win, keeps the user agent whole, and keeps Chrome off the keychain", () => {
     expect(launcherFlags(settings, "darwin")).toEqual([

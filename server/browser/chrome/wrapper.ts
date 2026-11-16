@@ -46,13 +46,6 @@ export function launcherFlags(settings: LauncherSettings, platform: NodeJS.Platf
   ];
 }
 
-/** Windows: the batch launcher runs through cmd.exe, whose console window stays open beside Chrome. agent-browser is
- * given Chrome itself instead, with the user agent (whose commas AGENT_BROWSER_ARGS would cut) in its own variable. */
-export function directLaunchEnv(settings: LauncherSettings, platform: NodeJS.Platform = process.platform): Record<string, string> {
-  const flags = launcherFlags(settings, platform).filter((flag) => !flag.startsWith("--user-agent="));
-  return { AGENT_BROWSER_EXECUTABLE_PATH: settings.chrome, AGENT_BROWSER_USER_AGENT: settings.userAgent, AGENT_BROWSER_ARGS: flags.join("\n") };
-}
-
 export function launcherPath(dataDir: string, platform: NodeJS.Platform = process.platform): string {
   return join(dataDir, "browser", platform === "win32" ? "chrome-launcher.cmd" : "chrome-launcher.sh");
 }
