@@ -35,8 +35,9 @@ export function whatsNewAudience(account: CloudAccountState | null): WhatsNewAud
 }
 
 /** No plan: the new Cloud, then Team. A plan of one's own: Team. Anyone in a team, or not known: nothing. */
-export function whatsNewSlides(audience: WhatsNewAudience | null): WhatsNewSlide[] {
-  return audience === "none" ? ["pro", "team"] : audience === "own" ? ["team"] : [];
+export function whatsNewSlides(_audience: WhatsNewAudience | null): WhatsNewSlide[] {
+  // HubBot sells no Cloud: no Cloud or Team slides, and no link to the Cloud website.
+  return [];
 }
 
 export interface WhatsNewView {

@@ -3,6 +3,8 @@ const { contextBridge, ipcRenderer, webFrame, webUtils } = require("electron");
 
 // Sandboxed preloads get Electron's restricted `require`, which cannot load sibling CommonJS files.
 const desktopRemoteClient = process.argv.includes("--openmausbot-remote-client");
+// HubBot sells no Cloud: the Cloud account, plan, purchase and Cloud-move bridges stay off.
+const CLOUD_SERVICES = false;
 
 let pendingPackageInstallUrl = null;
 const packageInstallListeners = new Set();
@@ -492,7 +494,7 @@ const bridge = {
       return () => ipcRenderer.removeListener("workspaces:open-settings", handler);
     },
   },
-  cloudAccount: process.argv.includes("--omb-company-desktop=1") ? {
+  cloudAccount: CLOUD_SERVICES && process.argv.includes("--omb-company-desktop=1") ? {
     state: () => ipcRenderer.invoke("cloud-account:state"),
     begin: () => ipcRenderer.invoke("cloud-account:begin"),
     signInAgain: () => ipcRenderer.invoke("cloud-account:signInAgain"),
@@ -544,7 +546,7 @@ const bridge = {
     },
   } : undefined,
   // Either page: the one-time move's line.
-  cloudSendPage: process.argv.includes("--omb-company-desktop=1") ? {
+  cloudSendPage: CLOUD_SERVICES && process.argv.includes("--omb-company-desktop=1") ? {
     notice: () => ipcRenderer.invoke("cloud-send:notice"),
     dismiss: signature => ipcRenderer.invoke("cloud-send:dismiss", String(signature)),
     moveRetry: () => isLocalPage || navigator.userActivation?.isActive === true
@@ -583,7 +585,7 @@ const bridge = {
     },
   } : undefined,
   // This computer's page and My Cloud's own page (main refuses any other): the other one's bots, listed beside this one's.
-  placesTogether: process.argv.includes("--omb-company-desktop=1") ? {
+  placesTogether: CLOUD_SERVICES && process.argv.includes("--omb-company-desktop=1") ? {
     state: () => ipcRenderer.invoke("places-together:state"),
     set: on => isLocalPage || navigator.userActivation?.isActive === true
       ? ipcRenderer.invoke("places-together:set", on === true) : Promise.reject(new Error("Turn the switch to list both places' bots.")),
@@ -616,7 +618,7 @@ const bridge = {
     },
   },
   // Who is signed in on this device: this app's own pages only (main checks the sender). No token ever comes through here.
-  accounts: process.argv.includes("--omb-company-desktop=1") ? {
+  accounts: CLOUD_SERVICES && process.argv.includes("--omb-company-desktop=1") ? {
     list: () => ipcRenderer.invoke("accounts:list"),
     signOut: id => ipcRenderer.invoke("accounts:sign-out", String(id)),
     addStart: email => ipcRenderer.invoke("accounts:add-start", String(email)),
@@ -639,12 +641,12 @@ const bridge = {
     },
   } : undefined,
   // Any place's page: opens the accounts sheet on the rail's page, from the person's click. The page learns nothing of them.
-  accountSheet: process.argv.includes("--omb-company-desktop=1") ? {
+  accountSheet: CLOUD_SERVICES && process.argv.includes("--omb-company-desktop=1") ? {
     offered: () => ipcRenderer.invoke("accounts:offered"),
     open: () => isLocalPage || navigator.userActivation?.isActive === true
       ? ipcRenderer.invoke("accounts:open") : Promise.reject(new Error("Choose your account to open it.")),
   } : undefined,
-  cloudPlan: process.argv.includes("--omb-company-desktop=1") ? {
+  cloudPlan: CLOUD_SERVICES && process.argv.includes("--omb-company-desktop=1") ? {
     state: () => ipcRenderer.invoke("cloud-plan:state"),
     manage: () => isLocalPage || navigator.userActivation?.isActive === true
       ? ipcRenderer.invoke("cloud-plan:manage") : Promise.reject(new Error("Choose Manage to open your Plan page.")),

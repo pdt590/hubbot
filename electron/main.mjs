@@ -832,8 +832,9 @@ async function readCloudOfferBrand() {
   brandedBuild = status.source === "file";
   refreshApplicationMenu();
 }
+// HubBot sells no Cloud: no Add a Cloud, plan or purchase offers anywhere.
 function cloudOffersAllowed() {
-  return app.isPackaged && !desktopRemoteAccess && brandedBuild === false;
+  return false;
 }
 async function cloudOffersReady() {
   if (brandedBuild === null && serverReady) await readCloudOfferBrand();

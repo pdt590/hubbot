@@ -31,7 +31,8 @@ export function useSettingsContext(): SettingsContext {
     client,
     admin,
     places: known > 1 || (!ogb?.environments && railShown(places)),
-    plan: desktop ? Boolean(ogb?.cloudAccount || (ogb?.cloudPlan && cloud)) : cloud && !team && admin,
+    // HubBot sells no Cloud plan: no Plan page anywhere.
+    plan: false,
     organization: Boolean(ogb?.organization) && !client,
     environments: Boolean(ogb?.environments),
     installations: workspacesAvailable(state.config),

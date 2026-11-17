@@ -7,7 +7,7 @@ vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 import { track } from "@/lib/analytics";
 import { setLocale } from "@/lib/i18n";
 import { WHATS_NEW_NOTICE } from "@/lib/notices";
-import { newCloudUrl, reportWhatsNew, startTeamUrl, WHATS_NEW_SOURCES, whatsNewAudience, whatsNewSlides, whatsNewView, type WhatsNewView } from "./whats-new";
+import { newCloudUrl, reportWhatsNew, startTeamUrl, WHATS_NEW_SOURCES, whatsNewAudience, whatsNewSlides, whatsNewView } from "./whats-new";
 
 const DAY = 86_400_000, NOW = Date.UTC(2026, 10, 12);
 const OFFER: CloudOffer = { recommended: "pro", refundDays: 14, plans: [
@@ -25,18 +25,18 @@ const running = { state: "active" as const, tier: "pro", endsAt: NOW + DAY, amou
 beforeEach(() => { setLocale("en"); vi.mocked(track).mockClear(); });
 
 describe("who sees which slides", () => {
-  it("no Cloud plan: the new Cloud, then Team; signed out or signed in with none, an ended Cloud of their own included", () => {
+  it("no Cloud plan: no slides (HubBot sells no Cloud); signed out or signed in with none, an ended Cloud of their own included", () => {
     for (const account of [{ status: "signed-out" } as CloudAccountState, free, { ...free, clouds: [listed({ status: "ended" })] },
       { ...free, clouds: [listed({ runsOn: "server", managed: false, tier: null })] }, { ...free, trial: { ...running, state: "ended" as const } }]) {
       expect(whatsNewAudience(account), JSON.stringify(account)).toBe("none");
-      expect(whatsNewSlides(whatsNewAudience(account))).toEqual(["pro", "team"]);
+      expect(whatsNewSlides(whatsNewAudience(account))).toEqual([]);
     }
   });
 
-  it("a Cloud plan of their own, in no team: the Team slide only, a trial on a personal plan included", () => {
+  it("a Cloud plan of their own, in no team: no slides either, a trial on a personal plan included", () => {
     for (const account of [onPlan("starter"), onPlan("personal"), onPlan("pro"), onPlan("max"), onPlan("pro", { trial: running }), onPlan("pro", { clouds: [listed({})] })]) {
       expect(whatsNewAudience(account), JSON.stringify(account.entitlement)).toBe("own");
-      expect(whatsNewSlides("own")).toEqual(["team"]);
+      expect(whatsNewSlides("own")).toEqual([]);
     }
   });
 
@@ -75,20 +75,14 @@ describe("who sees which slides", () => {
 });
 
 describe("the slides' plans, from the Admin's offer", () => {
-  it("names each plan with its price in the offer's numbers: Pro's money-back, Team's free trial", () => {
-    expect(whatsNewView({ status: "signed-out" }, OFFER)).toEqual({ slides: ["pro", "team"], audience: "none", signedIn: false, staging: false,
-      plans: { pro: { name: "Pro", terms: "Pro · $49/month + tax · 14-day money-back" }, team: { name: "Team", terms: "Free for 3 days, then $169/month + tax" } } });
-    const oneDay: CloudOffer = { ...OFFER, plans: OFFER.plans.map(plan => (plan.tier === "team" ? { ...plan, trialDays: 1 } : plan)) };
-    expect((whatsNewView({ status: "signed-out" }, oneDay) as WhatsNewView).plans.team?.terms).toBe("Free for 1 day, then $169/month + tax");
-    const priced: CloudOffer = { ...OFFER, refundDays: undefined, plans: OFFER.plans.map(plan => ({ ...plan, amount: plan.amount + 1000, trialDays: undefined })) };
-    expect(whatsNewView(onPlan("pro", { staging: true }), priced)).toEqual({ slides: ["team"], audience: "own", signedIn: true, staging: true,
-      plans: { team: { name: "Team", terms: "Team · $179/month + tax" } } });
+  it("shows nothing whatever the offer: HubBot sells no Cloud plan", () => {
+    expect(whatsNewView({ status: "signed-out" }, OFFER)).toBe("none");
+    expect(whatsNewView(onPlan("pro", { staging: true }), OFFER)).toBe("none");
   });
 
-  it("leaves out a slide whose plan isn't sold, and shows nothing when neither is; waits for the offer, and offline waits for a later launch", () => {
+  it("shows nothing when a plan isn't sold either; waits for the offer, and offline waits for a later launch", () => {
     const noTeam = { ...OFFER, plans: OFFER.plans.filter(plan => plan.tier !== "team") };
-    expect((whatsNewView(free, noTeam) as WhatsNewView).slides).toEqual(["pro"]);
-    expect((whatsNewView(free, { ...OFFER, plans: OFFER.plans.filter(plan => plan.tier !== "pro") }) as WhatsNewView).slides).toEqual(["team"]);
+    expect(whatsNewView(free, noTeam)).toBe("none");
     expect(whatsNewView(onPlan("pro"), noTeam)).toBe("none");
     expect(whatsNewView(free, undefined)).toBe("loading");
     expect(whatsNewView(free, null)).toBe("none");
