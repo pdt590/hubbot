@@ -753,6 +753,7 @@ export class BrowserLive {
   /** The person's browser stopped answering an input: restarted for them, on the same profile, and every view reconnects. */
   private async restartUnresponsive(viewer: Viewer): Promise<boolean> {
     if (viewer.restarting) return false;
+    console.warn(`[diag] restartUnresponsive ${viewer.session} at ${new Date().toISOString()}`); // DIAG-TEMP
     viewer.restarting = true;
     try {
       await this.runtime.restart(viewer.session, viewer.person, async () => {
@@ -816,8 +817,8 @@ export class BrowserLive {
         if (message.type === "frame") this.frame(viewer, message);
         else this.send(viewer, message);
       });
-      socket.addEventListener("error", () => { if (!viewer.restarting) { this.send(viewer, { type: "error", retryable: true, message: "The browser stream disconnected." }); this.close(viewer); } });
-      socket.addEventListener("close", () => { if (!viewer.restarting) this.close(viewer); });
+      socket.addEventListener("error", (event) => { console.warn(`[diag] stream socket error ${viewer.session} port=${port} restarting=${viewer.restarting} at ${new Date().toISOString()}: ${(event as { message?: string }).message ?? ""}`); /* DIAG-TEMP */ if (!viewer.restarting) { this.send(viewer, { type: "error", retryable: true, message: "The browser stream disconnected." }); this.close(viewer); } });
+      socket.addEventListener("close", (event) => { console.warn(`[diag] stream socket close ${viewer.session} port=${port} code=${event.code} restarting=${viewer.restarting} at ${new Date().toISOString()}`); /* DIAG-TEMP */ if (!viewer.restarting) this.close(viewer); });
       // Handlers go on before awaiting the upgrade: upstream sends its cached status, tabs and first frame right after opening.
       await new Promise<void>((resolve, reject) => {
         const timer = setTimeout(() => reject(new BrowserLiveError("The browser stream did not connect. Reopen the browser panel.", 503)), 10_000);

@@ -130,6 +130,7 @@ const closingBrowsers = new Map<string, Promise<boolean>>();
 export function closeBrowserSession(binaryPath: string, env: NodeJS.ProcessEnv, timeoutMs = 15_000): Promise<boolean> {
   const session = env.AGENT_BROWSER_SESSION;
   if (!session || !/^[A-Za-z0-9_.-]{1,96}$/.test(session)) return Promise.resolve(false);
+  console.warn(`[diag] closeBrowserSession ${session} at ${new Date().toISOString()}\n${new Error().stack?.split("\n").slice(2, 8).join("\n")}`); // DIAG-TEMP
   const key = browserDaemonFile(env, ".pid");
   const attempt = (closingBrowsers.get(key) ?? Promise.resolve(true)).then(() => closeOnce(binaryPath, env, session, timeoutMs)).catch(() => false).finally(() => {
     if (closingBrowsers.get(key) === attempt) closingBrowsers.delete(key);

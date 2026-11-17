@@ -1,6 +1,7 @@
 // agent-browser runs AGENT_BROWSER_EXECUTABLE_PATH with its own arguments. It splits AGENT_BROWSER_ARGS at commas (0.37),
 // which cut the user agent at "(KHTML,", so the identity flags ride a generated launcher instead: a shell script that execs
-// Chrome (same process, same pid), or on Windows a batch file, which Rust's Command runs through cmd.exe.
+// Chrome (same process, same pid). On Windows a batch file is still written, but once Chrome is ready agent-browser is
+// given Chrome itself (directLaunchEnv): a batch file runs through cmd.exe, whose console window opens beside Chrome.
 import { execFile } from "node:child_process";
 import { chmodSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -44,6 +45,15 @@ export function launcherFlags(settings: LauncherSettings, platform: NodeJS.Platf
     ...(settings.language ? [`--lang=${settings.language}`] : []),
     ...credentialStoreFlags(platform),
   ];
+}
+
+/** Windows: the batch launcher runs through cmd.exe, whose console window stays open beside Chrome. agent-browser is
+ * given Chrome itself instead, with the user agent (whose commas AGENT_BROWSER_ARGS would cut, even newline-separated) in
+ * its own variable. Without --user-agent the browser-level default stays HeadlessChrome; pages and workers are covered by
+ * agent-browser's override and the identity sidecar's (sidecar.ts), which attaches to each target paused at start. */
+export function directLaunchEnv(settings: LauncherSettings, platform: NodeJS.Platform = process.platform): Record<string, string> {
+  const flags = launcherFlags(settings, platform).filter((flag) => !flag.startsWith("--user-agent="));
+  return { AGENT_BROWSER_EXECUTABLE_PATH: settings.chrome, AGENT_BROWSER_USER_AGENT: settings.userAgent, AGENT_BROWSER_ARGS: flags.join("\n") };
 }
 
 export function launcherPath(dataDir: string, platform: NodeJS.Platform = process.platform): string {

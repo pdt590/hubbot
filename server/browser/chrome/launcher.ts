@@ -14,7 +14,7 @@ import { needsNoSandbox, type ChromeIdentity } from "./identity.ts";
 import { installChromeForTesting, type ChromeForTestingPin, type DownloadProgress } from "./install.ts";
 import { chromeHost, installedGoogleChrome, resolveChromePlan, type ChromeEngine, type ChromeHost, type ChromePlan, type FoundChrome } from "./resolve.ts";
 import { IdentitySidecars } from "./sidecar.ts";
-import { browserLanguage, browserTimeZone, languageList, launcherPath, primaryScreen, writeLauncher, type LauncherBox, type LauncherSettings, type Screen } from "./wrapper.ts";
+import { browserLanguage, browserTimeZone, directLaunchEnv, languageList, launcherPath, primaryScreen, writeLauncher, type LauncherBox, type LauncherSettings, type Screen } from "./wrapper.ts";
 
 type Ready = { kind: "ready"; chrome: FoundChrome; identity: ChromeIdentity; product: string; fingerprint: string; launcher?: LauncherSettings };
 type State =
@@ -141,6 +141,10 @@ export class ChromeLauncher implements BrowserLaunch {
     void this.prepare();
     this.followTimeZone();
     this.followLanguage();
+    const state = this.state;
+    if (this.options.platform === "win32" && state.kind === "ready" && state.launcher) {
+      return { ...directLaunchEnv(state.launcher, "win32"), AGENT_BROWSER_HIDE_SCROLLBARS: "0" };
+    }
     return { AGENT_BROWSER_EXECUTABLE_PATH: this.path, AGENT_BROWSER_HIDE_SCROLLBARS: "0" };
   }
 
@@ -245,7 +249,11 @@ export class ChromeLauncher implements BrowserLaunch {
   }
 
   private uses(spec: LaunchSpec): boolean {
-    return spec.env?.AGENT_BROWSER_EXECUTABLE_PATH === this.path && !attachesToChrome(spec.env);
+    const env = spec.env;
+    if (!env) return false;
+    const path = env.AGENT_BROWSER_EXECUTABLE_PATH;
+    const direct = this.options.platform === "win32" && this.state.kind === "ready" && this.state.launcher?.chrome === path;
+    return (path === this.path || direct) && !attachesToChrome(env);
   }
 
   private fresh(state: Ready): boolean {
