@@ -23,7 +23,7 @@ import {
   updateLabel,
   updatePhase,
 } from "./SidebarProfileMenu";
-import { DOCS_URL, FEEDBACK_URL, HELP_CENTER_URL, platformLabel } from "@/lib/app-links";
+import { FEEDBACK_URL, platformLabel } from "@/lib/app-links";
 import { profileForSession } from "@/lib/session";
 import {
   cloudPhoneDestination,
@@ -195,11 +195,6 @@ describe("updateNoteworthy", () => {
 });
 
 describe("outward links", () => {
-  it("sends Help Center to the docs the website also links to", () => {
-    expect(HELP_CENTER_URL).toBe(DOCS_URL);
-    expect(DOCS_URL).toBe("https://github.com/milind-soni/OpenMausBot/tree/main/docs");
-  });
-
   it("sends Send Feedback to the Discord community", () => {
     expect(FEEDBACK_URL).toBe("https://discord.gg/9Wb8MEpXRs");
   });

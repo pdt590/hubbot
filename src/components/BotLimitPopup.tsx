@@ -7,6 +7,7 @@ import { cloudPlanLabel } from "@/lib/cloud-plan";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
 import { useStore } from "@/state/store";
+import { DEFAULT_BOT_COLOR } from "@/lib/default-bot";
 import { MausAvatar } from "./Avatar";
 import { AwakeBotsPicker } from "./AwakeBotsPicker";
 import { useCloudPlanSnapshot } from "./CloudTrialNotice";
@@ -89,7 +90,7 @@ function BotLimitDialog({ reason, created, onClose }: { reason: BotLimitReason; 
       <div className={cn("ui-scrim fixed inset-0 flex items-center justify-center p-4 motion-reduce:animate-none", LAYER)}>
         <div role="dialog" aria-modal="true" aria-labelledby={TITLE} aria-describedby={settled ? undefined : BODY} data-bot-limit-popup=""
           className="ui-modal animate-pop-in relative flex w-[min(380px,calc(100vw-32px))] flex-col items-center border-0 px-6 pb-3 pt-8 text-center text-ink motion-reduce:animate-none">
-          <div aria-hidden="true"><MausAvatar color="chrome" size={52} state="idle" animated={false} /></div>
+          <div aria-hidden="true"><MausAvatar color={DEFAULT_BOT_COLOR} size={52} state="idle" animated={false} /></div>
           <h2 id={TITLE} className="mt-5 text-[19px] font-semibold leading-6 tracking-[-0.012em] [text-wrap:balance]">{title}</h2>
           {!settled && <p id={BODY} className="mt-1.5 text-[14px] leading-5 text-ink-secondary [text-wrap:pretty]">{body ?? t(inApp ? "botLimit.body" : "botLimit.bodyElsewhere")}</p>}
           {picking && <AwakeBotsPicker limit={awake} onSaved={onClose} {...(reason === "created" && created ? { swapIn: created } : {})} />}

@@ -1,11 +1,6 @@
 export const APP_NAME = "HubBot";
-export const APP_REPOSITORY = "https://github.com/milind-soni/OpenMausBot";
-export const DOCS_URL = `${APP_REPOSITORY}/tree/main/docs`;
-export const HELP_CENTER_URL = DOCS_URL;
-export const APPROVAL_LEVELS_URL = `${APP_REPOSITORY}/blob/main/docs/approval-levels.md`;
 export const PASSKEY_HELP_URL = "https://docs.openmausbot.com/docs/troubleshooting/google-sign-in-cloud-browser";
 export const FEEDBACK_URL = "https://discord.gg/9Wb8MEpXRs";
-export const RELEASES_URL = `${APP_REPOSITORY}/releases`;
 export const PRICING_URL = "https://www.openmausbot.com/pricing";
 export const CLOUD_PLAN_URL = "https://cloud.openmausbot.com/cloud";
 export function withSource(url: string, source: string): string {
@@ -13,7 +8,6 @@ export function withSource(url: string, source: string): string {
   target.searchParams.set("src", source);
   return target.href;
 }
-export const LICENSE_URL = `${APP_REPOSITORY}/blob/main/LICENSE`;
 
 export function appVersion(): string {
   return typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "dev";

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { DEFAULT_MASCOT_BODY, MASCOT_BODY_IDS } from "./mascot-bodies.ts";
+import { MASCOT_BODY_IDS } from "./mascot-bodies.ts";
 import { CARVED_BODY_IDS, DIWALI_BODY_IDS, HALLOWEEN_BODY_IDS, type CarvedBodyId } from "./carved-bodies.ts";
 import type { MausColor } from "./wire.ts";
 
@@ -12,9 +12,12 @@ export type BotBodyId = (typeof BOT_BODY_IDS)[number];
 
 export const botBodySchema = z.enum(BOT_BODY_IDS);
 
+/** The body a bot wears when it has not picked one. */
+export const DEFAULT_BOT_BODY: BotBodyId = "cat";
+
 /** Runtime-safe read of an untrusted persisted or streamed body id. */
 export function botBodyId(value: unknown): BotBodyId {
-  return botBodySchema.safeParse(value).data ?? DEFAULT_MASCOT_BODY;
+  return botBodySchema.safeParse(value).data ?? DEFAULT_BOT_BODY;
 }
 
 export function isCarvedBody(value: unknown): value is CarvedBodyId {

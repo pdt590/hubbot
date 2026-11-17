@@ -3,7 +3,7 @@ import { Crown } from "lucide-react";
 import { BotAvatar, MausAvatar } from "@/components/Avatar";
 import { usePrefersReducedMotion } from "@/components/mascot-clock";
 import { cn } from "@/lib/cn";
-import { chiefChoices, chiefFor, createChiefPatch, DEFAULT_BOT_NAME, myDefaultBot, setWelcomingBot, stageIntro, useViewerEmail } from "@/lib/default-bot";
+import { chiefChoices, chiefFor, createChiefPatch, DEFAULT_BOT_COLOR, DEFAULT_BOT_NAME, myDefaultBot, setWelcomingBot, stageIntro, useViewerEmail } from "@/lib/default-bot";
 import { t } from "@/lib/i18n";
 import { FLIGHT_MS, landInSidebar } from "@/lib/mausbot-landing";
 import { useStore, type Bot } from "@/state/store";
@@ -173,7 +173,7 @@ export function ChiefIntro({ replay, onDone, onLeave }: { replay: boolean; onDon
         <>
           <div className="flex flex-col items-center gap-4 px-6 pb-4 pt-6 text-center">
             <span ref={avatar} className="relative flex">
-              {maus ? <BotAvatar bot={maus} size={AVATAR_SIZE} motion="arrive" /> : <MausAvatar color="chrome" size={AVATAR_SIZE} label={DEFAULT_BOT_NAME} />}
+              {maus ? <BotAvatar bot={maus} size={AVATAR_SIZE} motion="arrive" /> : <MausAvatar color={DEFAULT_BOT_COLOR} size={AVATAR_SIZE} label={DEFAULT_BOT_NAME} />}
               <ChiefBadge />
             </span>
             <div className="flex flex-col gap-2">

@@ -21,8 +21,8 @@ const renderBot = (bot: Partial<BotAvatarProps["bot"]>) =>
   );
 
 describe("MausAvatar body", () => {
-  it("wears the cursor when no body is given", () => {
-    expect(render({})).toContain(MASCOT_BODIES.cursor.fit);
+  it("wears the cat when no body is given", () => {
+    expect(render({})).toContain('data-carved-body="cat"');
   });
 
   it("wears the body it is given", () => {
@@ -60,9 +60,9 @@ describe("mascot facial feature colors", () => {
   });
 
   it("keeps default inks when an override is reset or comes from an older profile", () => {
-    expect(renderBot({ color: "chrome", mascotFaceColor: null })).toContain('stroke="#1E2833"');
+    expect(renderBot({ color: "chrome", mascotBody: "cursor", mascotFaceColor: null })).toContain('stroke="#1E2833"');
     expect(renderBot({ mascotBody: "ghost" })).toContain('stroke="#0d0a10"');
-    expect(renderBot({})).toContain('stroke="#ffffff"');
+    expect(renderBot({ mascotBody: "cursor" })).toContain('stroke="#ffffff"');
   });
 
   it("does not paint features over an uploaded image", () => {

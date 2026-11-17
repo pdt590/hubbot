@@ -3,7 +3,7 @@ import { Check, Copy } from "lucide-react";
 import { api } from "@/state/store";
 import { useCopyFeedback } from "@/lib/copy-text";
 import { t } from "@/lib/i18n";
-import { LearnMore, SETTINGS_INPUT, SettingRow, SettingsEmptyRow, SettingsField, SettingsGroup, SettingsRows } from "./SettingsPrimitives";
+import { SETTINGS_INPUT, SettingRow, SettingsEmptyRow, SettingsField, SettingsGroup, SettingsRows } from "./SettingsPrimitives";
 import { SettingsSkeletonRows } from "./settings/SettingsStates";
 
 export interface CustomDomainStatus {
@@ -86,10 +86,6 @@ export function customDomainProxyExample(status: Pick<CustomDomainStatus, "appPo
 }`;
 }
 
-/** The self-hosting guide's section on custom domains: the server steps (DNS, the HTTPS proxy, ports) live there, behind
- * the row's Learn more, never inline in Settings. */
-export const CUSTOM_DOMAIN_GUIDE_URL = "https://github.com/milind-soni/OpenMausBot/blob/main/docs/self-hosting.md#connect-a-custom-domain-in-settings";
-
 export function CustomDomainSettings() {
   const [status, setStatus] = useState<CustomDomainStatus | null>(null);
   const [domain, setDomain] = useState("");
@@ -141,7 +137,7 @@ export function CustomDomainSettings() {
         {status?.supported && <>
           <SettingRow title={t("settings.domain.label")}
             subtitle={connected && status.publicUrl ? <span className="break-all">{status.publicUrl}</span>
-              : <>{t("settings.domain.rowLine")}{" "}<LearnMore href={CUSTOM_DOMAIN_GUIDE_URL} /></>}
+              : t("settings.domain.rowLine")}
             message={!open && notice ? <span role="status">{notice}</span> : undefined}>
             <button type="button" className="ui-button" aria-expanded={open} data-custom-domain-open="" onClick={() => setOpen(!open)}>
               {t(open ? "common.close" : connected ? "settings.domain.change" : "settings.domain.verify")}

@@ -3,7 +3,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { PREVIEW_STREAM_LIBRARIES_COMMAND, PREVIEW_STREAM_SANDBOX_STEPS_URL, type PreviewStreamControl, type PreviewStreamEvents, type PreviewStreamInput } from "@/lib/browser-stream-client";
+import { PREVIEW_STREAM_LIBRARIES_COMMAND, type PreviewStreamControl, type PreviewStreamEvents, type PreviewStreamInput } from "@/lib/browser-stream-client";
 import { setLocale } from "@/lib/i18n";
 import { controlPill } from "./ChromeRow";
 import { letterbox, mapToPage, mapToSurface, StreamSurface } from "./StreamSurface";
@@ -304,12 +304,10 @@ describe("who has the browser", () => {
 });
 
 describe("a host that cannot run the browser yet", () => {
-  it("links a blocked sandbox to its setup steps, and shows missing libraries their command, never both", async () => {
+  it("shows a blocked sandbox no command, and shows missing libraries their command", async () => {
     const { show, events } = await mount();
     await show(control("you"));
     await act(async () => events().onHostSetup?.({ need: "sandbox" }));
-    const link = [...host.querySelectorAll("a")].find((candidate) => candidate.textContent === "Browser sandbox setup steps");
-    expect(link?.getAttribute("href")).toBe(PREVIEW_STREAM_SANDBOX_STEPS_URL);
     expect(host.querySelector("code")).toBeNull();
     await act(async () => button("Try again").click());
     await act(async () => events().onHostSetup?.({ need: "libraries", command: PREVIEW_STREAM_LIBRARIES_COMMAND }));

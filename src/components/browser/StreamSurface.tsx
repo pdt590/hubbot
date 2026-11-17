@@ -19,7 +19,6 @@ import {
 
 import {
   createPreviewFramePainter,
-  PREVIEW_STREAM_SANDBOX_STEPS_URL,
   previewStreamHostSetupMessage,
   previewStreamModifiers,
   uploadPreviewStreamFiles,
@@ -768,9 +767,7 @@ export function StreamSurface(props: {
           <p role="alert" className="max-w-sm text-[13px] text-ink-secondary">{previewStreamHostSetupMessage(hostSetup)}</p>
           {hostSetup.need !== "sandbox" ? (
             <code className="max-w-md select-all break-all rounded-lg bg-inset px-3 py-2 text-left text-[12px] text-ink">{hostSetup.command}</code>
-          ) : (
-            <a href={PREVIEW_STREAM_SANDBOX_STEPS_URL} target="_blank" rel="noopener noreferrer" className="text-[12px] text-ink underline">Browser sandbox setup steps</a>
-          )}
+          ) : null}
           <button type="button" className="rounded-lg border border-hairline px-3 py-1.5 text-[12px] text-ink hover:bg-inset" onClick={() => setHostSetup(null)}>{t("common.tryAgain")}</button>
         </div>
       ) : null}

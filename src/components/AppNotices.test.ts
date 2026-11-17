@@ -197,7 +197,7 @@ describe("the card after the update", () => {
   it("needs a trial: without one it waits (the star may show), and without money-back from the Admin it says none", async () => {
     returning(); offer = { ...PLAIN_OFFER };
     let html = await launch();
-    expect(html).not.toContain(INTRO); expect(html).toContain(STAR);
+    expect(html).not.toContain(INTRO); expect(html).not.toContain(STAR);
     expect(storage.get(`${CLOUD_INTRO}:days`)).toBeUndefined();
     offer = null; expect(await relaunch()).not.toContain(INTRO);
     offer = { ...TRIAL_OFFER, refundDays: undefined, creditUsd: undefined };
@@ -218,7 +218,7 @@ describe("the card after the update", () => {
     f.brand = "default";
     (window.ogb as Record<string, unknown>).organization = { state: async () => ({ status: "connected", organization: { id: "o", name: "Acme" } }), onState: () => () => {} };
     const org = await launch();
-    expect(org).not.toContain(INTRO); expect(org).toContain(STAR);
+    expect(org).not.toContain(INTRO); expect(org).not.toContain(STAR);
   });
 
   it("Start free trial opens the Add a Cloud dialog from the card, and the card is done for good", async () => {
@@ -265,7 +265,7 @@ describe("the card after the update", () => {
     for (let day = 0; day < 3; day++) { now = NOW + day * DAY; expect(await relaunch(), `day ${day}`).toContain(INTRO); }
     now = NOW + 3 * DAY;
     const after = await relaunch();
-    expect(after).not.toContain(INTRO); expect(after).toContain(STAR);
+    expect(after).not.toContain(INTRO); expect(after).not.toContain(STAR);
     storage.clear(); launchCardsSeen(); f.state.config.onboarding.hintsSeen = [...withTourFinished(undefined), "pro-introduction-dismissed-v3"];
     now = NOW + 10 * DAY; expect(await relaunch()).toContain(INTRO);
     now = NOW + 11 * DAY; expect(await relaunch()).not.toContain(INTRO);
@@ -278,7 +278,7 @@ describe("the card after the update", () => {
       for (let day = 0; day < 3; day++) {
         now = NOW + day * DAY;
         const html = await launch();
-        expect(html, `${state.status} day ${day}`).not.toContain(INTRO); expect(html, `${state.status} day ${day}`).toContain(STAR);
+        expect(html, `${state.status} day ${day}`).not.toContain(INTRO); expect(html, `${state.status} day ${day}`).not.toContain(STAR);
       }
     }
     expect(storage.get(`${CLOUD_INTRO}:days`)).toBeUndefined();
@@ -366,9 +366,7 @@ describe("This computer's Cloud sign-in card and the star", () => {
     press("Sign in again"); await flush();
     expect(bridges.cloud.signInAgain).toHaveBeenCalledOnce();
     account = { ...free }; offer = { ...PLAIN_OFFER };
-    expect(await relaunch()).toContain(STAR);
-    press("Not now");
-    expect(storage.get(STAR_NOTICE)).toBe("1"); expect(await relaunch()).toBe("");
+    expect(await relaunch()).toBe("");
   });
 });
 
@@ -598,7 +596,7 @@ describe("Boat's credit offer", () => {
     line(undefined);
     expect(await relaunch()).toContain(html(TITLE));
     press("Not now"); await flush();
-    expect(await relaunch()).toContain(STAR);
+    expect(await relaunch()).not.toContain(STAR);
   });
 });
 
@@ -716,10 +714,10 @@ describe("What's new after the update", () => {
     expect(on(proOnly)).toBe("pro"); expect(proOnly).not.toContain(TEAM); expect(proOnly).not.toContain(">Next<");
     account = paid();
     const nothing = await relaunch();
-    expect(on(nothing)).toBeNull(); expect(nothing).toContain(STAR);
+    expect(on(nothing)).toBeNull(); expect(nothing).not.toContain(STAR);
     account = signedOut; offer = null;
     const offline = await relaunch();
-    expect(on(offline)).toBeNull(); expect(offline).toContain(STAR);
+    expect(on(offline)).toBeNull(); expect(offline).not.toContain(STAR);
     account = { status: "unavailable" }; offer = teamOffer;
     expect(on(await relaunch())).toBeNull();
     expect(seenOnDesktop()).toEqual([]);
@@ -961,7 +959,7 @@ describe("no Use my Mac popup", () => {
     desk.handlers.set("cloud-lending:due", async () => true);
     desk.handlers.set("cloud-lending:ask", (_event: unknown, language: unknown) => { asked.push(language); return Promise.resolve(); });
     returning(); storage.set(CLOUD_INTRO, "1");
-    expect(await launch()).toContain(STAR);
+    expect(await launch()).not.toContain(STAR);
     snapshot = { status: "none" }; viewer = { hosted: false, canSave: true, cloudHome: true }; f.state.config.cloudHome = true;
     f.state.config.onboarding.hintsSeen = [...withTourFinished(undefined), "cloud-setup-hidden"]; showWindow(MY_CLOUD);
     await launch();
@@ -1523,15 +1521,6 @@ describe("ModelGo's sponsor card", () => {
     expect(await settle(), "after the trial's notice").toContain(TITLE);
   });
 
-  it("a card left up keeps the corner: the card waits for it to close", async () => {
-    returning(); storage.delete(STAR_NOTICE); storage.set(CLOUD_INTRO, "1"); storage.set(MODELGO_OFFER_NOTICE, "1");
-    expect(await launch()).toContain("Enjoying HubBot?");
-    due();
-    expect(await settle(), "the star took the launch and is still up").not.toContain(TITLE);
-    press("Not now"); await flush();
-    expect(await settle()).toContain(TITLE);
-  });
-
   it("follows a closed notice only where it may show at all: not on a branded build, an organization that refuses it, a move to My Cloud or a call", async () => {
     returning(); desk.saved = null; storage.delete(WHATS_NEW_NOTICE);
     f.state.config.managedPolicy = { organizationName: "Acme", companyModelsOnly: true, allowedEngines: "all" };
@@ -1635,16 +1624,6 @@ describe("cards from the announcements file", () => {
     expect(await settle(), "it stays up alone").not.toContain("Title of phone-app");
     press("Not now"); await flush();
     expect(await settle(), "after the move's popup").toContain("Title of phone-app");
-  });
-
-  it("a card left up keeps the corner: a card that arrives meanwhile waits for it to close", async () => {
-    returning(); storage.delete(STAR_NOTICE); storage.set(CLOUD_INTRO, "1"); feed = [];
-    expect(await launch()).toContain("Enjoying HubBot?");
-    feed = [card("phone-app")]; forgetAnnouncementCards();
-    const still = await settle();
-    expect(still, "the star took the launch and is still up").toContain("Enjoying HubBot?"); expect(still).not.toContain("Title of phone-app");
-    press("Not now"); await flush();
-    expect(await settle()).toContain("Title of phone-app");
   });
 
   it("not after another remote card in the same launch, even with a third card due", async () => {

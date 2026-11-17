@@ -4,7 +4,7 @@ import type { MausColor } from "./wire.ts";
 /** HubBot: every person's built-in helper. A new install's first bot (its Chief of Staff too); an existing place or
  * person without one is given one once. It can be renamed and recoloured, hidden from the sidebar, never deleted. */
 export const DEFAULT_BOT_NAME = "HubBot";
-export const DEFAULT_BOT_COLOR: MausColor = "chrome";
+export const DEFAULT_BOT_COLOR: MausColor = "green";
 
 export interface DefaultBotMark {
   /** Team Cloud only: the lowercased email of the member this HubBot belongs to. Absent: the place's own. */

@@ -11,12 +11,12 @@ describe("bot bodies", () => {
     for (const id of BOT_BODY_IDS) expect(botBodySchema.safeParse(id).success).toBe(true);
   });
 
-  it("falls back to the cursor for anything it does not know", () => {
+  it("falls back to the default body (the cat) for anything it does not know", () => {
     expect(botBodyId("pumpkin")).toBe("pumpkin");
     expect(botBodyId("laddu")).toBe("laddu");
     expect(botBodyId("star")).toBe("star");
-    expect(botBodyId("hexagram")).toBe("cursor");
-    expect(botBodyId(undefined)).toBe("cursor");
+    expect(botBodyId("hexagram")).toBe("cat");
+    expect(botBodyId(undefined)).toBe("cat");
   });
 
   it("tells the festival bodies apart", () => {

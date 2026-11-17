@@ -32,7 +32,7 @@ describe("HubBot, every person's helper", () => {
   beforeEach(() => rmSync(DATA_DIR, { recursive: true, force: true }));
   afterEach(() => readTeamRolesWith(() => null));
 
-  it("gives a fresh install one HubBot, its Chief, in chrome, introduced once", () => {
+  it("gives a fresh install one HubBot, its Chief, in green, introduced once", () => {
     const store = new Store(selection);
     store.seedIfEmpty();
     boot(store);
@@ -42,7 +42,7 @@ describe("HubBot, every person's helper", () => {
     boot(again);
     expect(again.bots).toHaveLength(1);
     const maus = placeMausBots(again)[0]!;
-    expect(maus).toMatchObject({ name: "HubBot", color: "chrome", chiefOfStaff: true, defaultBot: {} });
+    expect(maus).toMatchObject({ name: "HubBot", color: "green", chiefOfStaff: true, defaultBot: {} });
     expect(intros(again, maus)).toHaveLength(1);
   });
 
@@ -63,7 +63,7 @@ describe("HubBot, every person's helper", () => {
     store.createBot({ name: "Writer", title: "Writer", soul: "Write." });
     const before = structuredClone(store.bot(chief.id));
     const maus = boot(store)!;
-    expect(maus).toMatchObject({ name: "HubBot", color: "chrome", defaultBot: {} });
+    expect(maus).toMatchObject({ name: "HubBot", color: "green", defaultBot: {} });
     expect(maus.chiefOfStaff).toBeFalsy();
     expect(chiefLevel(maus)).toBe(true);
     expect(store.bot(chief.id)).toEqual(before);
@@ -85,7 +85,7 @@ describe("HubBot, every person's helper", () => {
     store.createBot({ name: "Writer" });
     const adopted = boot(store)!;
     expect(adopted.id).toBe(seeded.id);
-    expect(adopted).toMatchObject({ name: "Jarvis", color: "chrome", chiefOfStaff: true, defaultBot: {} });
+    expect(adopted).toMatchObject({ name: "Jarvis", color: "green", chiefOfStaff: true, defaultBot: {} });
     expect(store.bots).toHaveLength(2);
     expect(history).toHaveLength(2);
     expect(store.messagesFor(first).map((message) => message.id)).toEqual(history);

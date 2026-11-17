@@ -18,7 +18,7 @@ import type { SettingsPlace } from "./settings-context";
 import { OWNERS, pageById, type SearchHit, type SettingsContext, type SettingsOwner, type SettingsPage, type SettingsPageId } from "./settings-index";
 import { useUpdaterState } from "@/lib/updater";
 import { keySection, type KeyEntry } from "../keys/key-catalog";
-import { HELP_CENTER_URL, desktopAppVersion } from "@/lib/app-links";
+import { desktopAppVersion } from "@/lib/app-links";
 
 export const NAV_ITEM = "relative flex h-8 w-full shrink-0 cursor-pointer items-center gap-2 rounded-lg px-2 text-left text-[13px] leading-5 text-ink transition-colors motion-reduce:transition-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus";
 
@@ -247,9 +247,7 @@ function SearchResults({ ctx, place, hits, keyHits, onKey, query, onHit }: {
   if (here.length === 0 && elsewhere.length === 0 && keyHits.length === 0) {
     return (
       <div data-settings-no-match="" className="flex flex-col items-center gap-1 px-2 py-6 text-center">
-        <p className="text-[13px] leading-[18px] text-ink-secondary">{t("settings.noMatch", { query: query.trim() })}</p>
-        <a href={HELP_CENTER_URL} target="_blank" rel="noreferrer" className="text-[12px] leading-4 text-accent-text hover:underline">{t("settings.search.helpCenter")}</a>
-      </div>
+        <p className="text-[13px] leading-[18px] text-ink-secondary">{t("settings.noMatch", { query: query.trim() })}</p>      </div>
     );
   }
   return (

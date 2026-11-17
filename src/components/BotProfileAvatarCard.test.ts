@@ -60,11 +60,11 @@ describe("BotProfileAvatarCard body picker", () => {
     expect(markup).toContain(`aria-pressed="false" aria-label="Use the ${CARVED_BODIES.witch.name} body"`);
   });
 
-  it("marks the current body pressed and the rest unpressed, defaulting to cursor", () => {
+  it("marks the current body pressed and the rest unpressed, defaulting to the cat", () => {
     const markup = renderCard(makeBot());
 
-    expect(markup).toContain(`aria-pressed="true" aria-label="Use the ${MASCOT_BODIES.cursor.name} body"`);
-    expect(markup).toContain(`aria-pressed="false" aria-label="Use the ${MASCOT_BODIES.star.name} body"`);
+    expect(markup).toContain(`aria-pressed="true" aria-label="Use the Cat body"`);
+    expect(markup).toContain(`aria-pressed="false" aria-label="Use the ${MASCOT_BODIES.cursor.name} body"`);
   });
 
   it("reflects an explicitly chosen body", () => {

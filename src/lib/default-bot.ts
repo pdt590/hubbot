@@ -4,7 +4,7 @@ import { api } from "@/state/api";
 import { chiefScope, type OwnedBot } from "../../shared/bot-owner";
 import { defaultBotPerson, viewersDefaultBot, type DefaultBotFields } from "../../shared/default-bot";
 
-export { DEFAULT_BOT_NAME } from "../../shared/default-bot";
+export { DEFAULT_BOT_COLOR, DEFAULT_BOT_NAME } from "../../shared/default-bot";
 
 let email: string | null | undefined;
 const listeners = new Set<() => void>();

@@ -93,8 +93,6 @@ export function ToolSelectionCard({ bot, engineKind }: { bot: Bot; engineKind?: 
       <button type="button" disabled={saving || !!bot.busy || !draft || !parsed.ok} onClick={() => void save()}
         className="rounded-lg bg-control px-3 py-2 text-[13px] text-ink hover:bg-raised-hover disabled:opacity-50">
         {t(saving ? "botAccess.tools.saving" : "botAccess.tools.save")}
-      </button>
-      <a href="https://github.com/milind-soni/OpenMausBot/blob/main/docs/tool-selection.md" target="_blank" rel="noreferrer" className="text-[12px] text-ink-secondary underline">{t("botAccess.tools.examples")}</a>
-    </div>
+      </button>    </div>
   </div>;
 }

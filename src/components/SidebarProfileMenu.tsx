@@ -53,7 +53,7 @@ import { cn } from "@/lib/cn";
 import { meterPercent, resetLine } from "@/lib/usage-meter";
 import type { CloudPlanSnapshot } from "../../electron/cloud-account.mjs";
 import { activeLocale, t } from "@/lib/i18n";
-import { FEEDBACK_URL, HELP_CENTER_URL, RELEASES_URL, appVersion, openExternalLink } from "@/lib/app-links";
+import { FEEDBACK_URL, appVersion, openExternalLink } from "@/lib/app-links";
 import { pageIsThisComputer } from "@/lib/companion-bridge";
 import { cloudPlanLabel } from "@/lib/cloud-plan";
 import { shortcutLabel } from "./ShortcutHint";
@@ -459,7 +459,7 @@ export function profileMenuItems({
   onSettings: () => void;
   onShortcuts: () => void;
   onAbout: () => void;
-  onHelp: () => void;
+  onHelp?: () => void;
   onFeedback: () => void;
   onWhatsNew?: () => void;
   /** the last row while someone is signed in, where signing out can work from this page */
@@ -475,7 +475,7 @@ export function profileMenuItems({
     trailing: <span className="ui-button ui-button-sm ui-button-primary pointer-events-none flex h-6 shrink-0 items-center rounded-full px-2.5 text-[12px] font-medium">{updateTop.action}</span>,
   } : null;
   const help: SidebarMenuItem[] = [
-    { key: "help", label: t("sidebar.menu.help"), icon: <HelpCircle size={16} />, onSelect: onHelp },
+    ...(onHelp ? [{ key: "help", label: t("sidebar.menu.help"), icon: <HelpCircle size={16} />, onSelect: onHelp }] : []),
     ...(onWhatsNew ? [{ key: "whats-new", label: t("sidebar.menu.whatsNew"), icon: <Sparkles size={16} />, onSelect: onWhatsNew }] : []),
     { key: "shortcuts", label: t("sidebar.menu.shortcuts"), icon: <Keyboard size={16} />, trailing: keyHint(shortcutLabel("shortcuts-cheat-sheet")), onSelect: onShortcuts },
     { key: "feedback", label: t("sidebar.menu.feedback"), icon: <MessageSquare size={16} />, onSelect: onFeedback },
@@ -595,9 +595,7 @@ export function SidebarProfileMenu({ iconOnly = false, rail = false, circle = fa
       dispatch({ type: "toggleShortcuts", open: true });
     },
     onAbout: () => setAboutOpen(true),
-    onHelp: () => void openExternalLink(HELP_CENTER_URL),
     onFeedback: () => void openExternalLink(FEEDBACK_URL),
-    onWhatsNew: () => void openExternalLink(RELEASES_URL),
     // Every Sign out asks first: "Sign out of HubBot?" and what keeps running.
     signOut: accounts.view?.active ? null
       : !desktop && session?.kind === "session" ? () => setSigningOut("browser")

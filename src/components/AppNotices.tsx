@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Rocket, Star } from "lucide-react";
+import { Rocket } from "lucide-react";
 import type { CloudAccountState } from "../../electron/cloud-account.mjs";
 import type { CloudOffer } from "../../electron/cloud-home.mjs";
 import { api, useStore } from "@/state/store";
-import { APP_REPOSITORY, appVersion } from "@/lib/app-links";
+import { appVersion } from "@/lib/app-links";
 import { track } from "@/lib/analytics";
 import { announcementConditions, announcementPlan, announcementPlatform, announcementSurface, markLaunchAnnouncement, pickAnnouncement, providersRestricted, rememberCardSeen, rememberSponsorDay,
   reportAnnouncement, SPONSOR_CARDS_FOR_TEAM_MEMBERS, useAnnouncementCards, type SeenRecord } from "@/lib/announcements";
@@ -46,16 +46,6 @@ import { PhoneUpdateCard, phonesToTell, useRetiredLinkPhones } from "./PhoneUpda
 import { reportSimpleModePrompt, SimpleModePrompt } from "./SimpleModePrompt";
 import { TwoPlacesCard } from "./TwoPlacesCard";
 import { WhatsNewPopup } from "./whats-new/WhatsNewPopup";
-
-function StarCard({ onDismiss }: { onDismiss: () => void }) {
-  return <NoticeCard titleId="github-star-title" notice="github-star" icon={Star} title={t("star.title")} onDismiss={onDismiss}>
-    <p className="mb-3 mt-1 text-[13px] text-ink-secondary">{t("star.body")}</p>
-    <div className="flex flex-wrap items-center gap-3">
-      <LinkButton url={APP_REPOSITORY} label={t("star.button")} onOpened={onDismiss} />
-      <NotNowButton onClick={onDismiss} />
-    </div>
-  </NoticeCard>;
-}
 
 function ProductHuntCard({ onDone }: { onDone: (action: "upvote" | "not_now" | "close") => void }) {
   return <NoticeCard titleId="product-hunt-title" notice="product-hunt" icon={Rocket} title={t("productHunt.title")} onDismiss={() => onDone("close")}>
@@ -257,7 +247,7 @@ export function AppNotices({ quiet = false, viewer = null, now = Date.now }: { q
     [BOAT_OFFER_NOTICE]: !boatHere || moving || afterWelcome === true || !usedBefore(state.bots) || desktopState?.seen.includes(BOAT_OFFER_NOTICE) ? false
       : organization === null || moving === null || afterWelcome === null || mausBotFirst || (desktop && !desktopState) ? null : !organization,
     [ANNOUNCEMENT_NOTICE]: announcementNow,
-    [STAR_NOTICE]: !bridge || moving || brandStatus().source === "file" || !usedBefore(state.bots) ? false : moving === null ? null : true,
+    [STAR_NOTICE]: false,
   }, id => id === CLOUD_INTRO ? stage === "done" && !introOpen
     : id === STAR_NOTICE || id === PRODUCT_HUNT_NOTICE || id === BOAT_OFFER_NOTICE || id === MODELGO_OFFER_NOTICE ? noticeSeen(record, id) : false, launch, closed) : null;
 
@@ -388,6 +378,5 @@ export function AppNotices({ quiet = false, viewer = null, now = Date.now }: { q
     };
     return <AnnouncementCard key={announcement.id} card={announcement} onDone={done} open={place => dispatch(announcementPlaceAction(place))} />;
   }
-  if (notice === STAR_NOTICE) return <StarCard onDismiss={() => { close(); save(STAR_NOTICE); }} />;
   return null;
 }

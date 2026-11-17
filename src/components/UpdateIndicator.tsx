@@ -4,7 +4,7 @@ import { ArrowDown, ArrowDownToLine, Loader2, PackageOpen, RefreshCw, X } from "
 
 import { updaterMessage, useUpdaterState, type UpdaterState } from "@/lib/updater";
 import { releaseHighlights } from "@/lib/release-highlights";
-import { RELEASES_URL, desktopAppVersion, openExternalLink } from "@/lib/app-links";
+import { desktopAppVersion } from "@/lib/app-links";
 import { productName } from "../lib/brand";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
@@ -228,13 +228,6 @@ export function UpdateCard({
             </ul>
           </div>
         )}
-        <button
-          type="button"
-          onClick={() => void openExternalLink(RELEASES_URL)}
-          className={cn(highlights.length > 0 ? "mt-3" : "mt-5", "block text-[13px] font-medium leading-5 text-accent hover:underline")}
-        >
-          {t("update.card.allNotes")}
-        </button>
 
         {percent != null && (
           <div

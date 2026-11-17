@@ -509,7 +509,7 @@ describe("the avatar editor", () => {
   const editor = (bot: Bot) => capture(() => AvatarEditorCard({ bot, activeState: "idle", onPatch: patch, onClose }));
 
   it("shows the ten bodies and twelve colors, with the festival bodies and the faces behind More looks", () => {
-    const bot = makeBot();
+    const bot = makeBot({ mascotBody: "cursor" });
     const rendered = editor(bot);
     expect(rendered.html.match(/aria-label="Use the \w+ body"/g)).toHaveLength(10);
     expect(rendered.html.match(/aria-label="Use \w+ mascot color"/g)).toHaveLength(12);
@@ -547,14 +547,16 @@ describe("the avatar editor", () => {
     expect(open.html).toContain(">Proud<");
   });
 
-  it("opens More looks at once for a festival body or a chosen face", () => {
+  it("opens More looks at once for a festival body (the default cat included) or a chosen face", () => {
     expect(find(editor(makeBot({ mascotBody: "pumpkin" })), "data-avatar-more").props["aria-expanded"]).toBe(true);
     fresh();
     expect(find(editor(makeBot({ mascotBody: "laddu" })), "data-avatar-more").props["aria-expanded"]).toBe(true);
     fresh();
     expect(find(editor(makeBot({ mascotExpression: "proud" })), "data-avatar-more").props["aria-expanded"]).toBe(true);
     fresh();
-    expect(find(editor(makeBot()), "data-avatar-more").props["aria-expanded"]).toBe(false);
+    expect(find(editor(makeBot()), "data-avatar-more").props["aria-expanded"]).toBe(true);
+    fresh();
+    expect(find(editor(makeBot({ mascotBody: "cursor" })), "data-avatar-more").props["aria-expanded"]).toBe(false);
   });
 
   it("switches back to the mascot when a body is picked over a picture", () => {
@@ -566,7 +568,7 @@ describe("the avatar editor", () => {
 
   it("resets the mascot as the Advanced card does", () => {
     click(find(editor(makeBot()), "data-avatar-reset"));
-    expect(patch).toHaveBeenLastCalledWith({ avatarCrop: "mascot", color: "green", mascotExpression: null, mascotBody: "cursor", mascotFaceColor: null });
+    expect(patch).toHaveBeenLastCalledWith({ avatarCrop: "mascot", color: "green", mascotExpression: null, mascotBody: "cat", mascotFaceColor: null });
   });
 
   it("edits facial feature color without changing body color or expression", () => {

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { removeTempDir } from "../../testing/cleanup.ts";
-import { appArmorProfile, BrowserHostError, diagnoseLaunchFailure, hostSetupOf, LIBRARIES_COMMAND, missingLibraries, SANDBOX_STEPS_URL, sandboxBlocked, sandboxDisabled, USERNS_RESTRICTION } from "./host-setup.ts";
+import { appArmorProfile, BrowserHostError, diagnoseLaunchFailure, hostSetupOf, LIBRARIES_COMMAND, missingLibraries, sandboxBlocked, sandboxDisabled, USERNS_RESTRICTION } from "./host-setup.ts";
 
 const folders: string[] = [];
 afterAll(async () => { for (const folder of folders) await removeTempDir(folder); });
@@ -21,13 +21,9 @@ describe("host setup", () => {
     const diagnosis = await diagnoseLaunchFailure({ executable: "/opt/chrome", output: "[0101/000000.000:FATAL:zygote_host_impl_linux.cc] No usable sandbox! ...", platform: "darwin", exists: () => false });
     expect(diagnosis).toBeInstanceOf(BrowserHostError);
     expect(diagnosis?.kind).toBe("sandbox");
-    expect(diagnosis?.message).toContain(SANDBOX_STEPS_URL);
     expect(diagnosis?.message).not.toMatch(/browser setup/);
-    // The linked steps exist, and the viewer offers the same link and command.
-    expect(readFileSync(new URL("../../../docs/deploy-vps.md", import.meta.url), "utf8")).toMatch(/^### Ubuntu 24\.04 browser sandbox$/m);
-    expect(SANDBOX_STEPS_URL.endsWith("/docs/deploy-vps.md#ubuntu-2404-browser-sandbox")).toBe(true);
+    // The viewer offers the same command.
     const viewer = readFileSync(new URL("../../../src/lib/browser-stream-client.ts", import.meta.url), "utf8");
-    expect(viewer).toContain(`"${SANDBOX_STEPS_URL}"`);
     expect(viewer).toContain(`"${LIBRARIES_COMMAND}"`);
     expect(LIBRARIES_COMMAND).toBe("sudo openmausbot browser install --with-deps");
     expect(new BrowserHostError("libraries", ["libnss3.so"]).message).toContain(LIBRARIES_COMMAND);

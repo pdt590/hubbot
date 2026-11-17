@@ -64,7 +64,7 @@ function releaseNotes(release: GitHubRelease) {
   if (!legacyDraft) return body;
 
   const commit = legacyDraft[1];
-  return `This build predates curated release notes. [View its source commit (${commit.slice(0, 7)})](https://github.com/milind-soni/OpenMausBot/commit/${commit}).`;
+  return `This build predates curated release notes. Source commit: ${commit.slice(0, 7)}.`;
 }
 
 async function fetchPublishedReleases(repository: string): Promise<GitHubRelease[]> {
@@ -128,8 +128,7 @@ export async function ReleaseChangelog() {
   if (releases.length === 0) {
     return (
       <p>
-        The live release history is temporarily unavailable.{' '}
-        <a href="https://github.com/milind-soni/OpenMausBot/releases">Browse releases on GitHub</a>.
+        The live release history is temporarily unavailable.
       </p>
     );
   }

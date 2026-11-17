@@ -168,11 +168,11 @@ describe("the update card", () => {
     expect(card()!.textContent).toContain("Try again");
   });
 
-  it("links to all release notes even when none read as highlights", async () => {
+  it("shows no highlights when none read as highlights, and no release-notes link", async () => {
     await emit({ status: "downloaded", version: "0.2.0", releaseNotes: "A steadier build with small fixes." });
     await act(async () => button()!.click());
     expect(card()!.querySelectorAll("li")).toHaveLength(0);
-    expect(card()!.textContent).toContain("All release notes");
+    expect(card()!.textContent).not.toContain("All release notes");
   });
 
   it("uses one md button scale in the footer", async () => {
